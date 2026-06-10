@@ -59,10 +59,15 @@ export default function LandingPage() {
               to the vibrant streets of Kathmandu.
             </p>
 
-            <button className="mt-10 bg-[#A95700] hover:bg-[#8b4700] text-white px-10 py-5 rounded-xl font-semibold flex items-center gap-3 shadow-md">
-              Get Started
+            <Link 
+            href="/signin"
+            className="mt-10 inline-flex items-center justify-center gap-3
+             w-64 h-16
+             bg-[#A95700] hover:bg-[#8b4700]
+             text-white font-semibold rounded-xl shadow-md"
+>              Get Started
               <ArrowRight size={18} />
-            </button>
+            </Link>
           </div>
 
           <div className="flex justify-center">
@@ -180,10 +185,13 @@ export default function LandingPage() {
                 adventures and school-day fables.
               </p>
 
-              <button className="mt-8 bg-[#C2185B] text-white px-8 py-4 rounded-full font-semibold flex items-center gap-2">
+              <Link
+              href="/signin"
+              className="mt-8 inline-flex items-center justify-center gap-3
+             w-64 h-16 bg-[#C2185B] text-white px-8 py-4 rounded-full font-semibold flex items-center gap-2">
                 Explore Library
                 <ArrowRight size={18} />
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -284,9 +292,12 @@ export default function LandingPage() {
             Ready to spark a lifetime of curiosity?
           </h2>
 
-          <button className="mt-12 bg-[#7A3400] text-white px-10 py-5 rounded-full font-semibold">
-            Get Started for Free 🚀
-          </button>
+          <Link
+           href="/signin"
+          className="mt-12 inline-flex items-center justify-center gap-3
+             w-64 h-16 bg-[#7A3400] text-white px-10 py-5 rounded-full font-semibold">
+            Get Started for Free
+          </Link>
         </div>
       </section>
 
