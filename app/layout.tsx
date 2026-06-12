@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Be_Vietnam_Pro } from "next/font/google";
 import "./globals.css";
+import { SignupProvider } from "./context/SignupContext";
 
 const beVietnamPro = Be_Vietnam_Pro({
   subsets: ["latin"],
@@ -21,7 +22,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={beVietnamPro.className}>
-        {children}
+        
+        <SignupProvider>
+          {children}
+        </SignupProvider>
+
       </body>
     </html>
   );

@@ -2,18 +2,18 @@
 
 import Link from "next/link";
 import { ArrowRight, GraduationCap, School, Users } from "lucide-react";
-import { useState } from "react";
+import { useSignup } from "@/app/context/SignupContext";
 
 export default function SignupRolePage() {
-  const [selectedRole, setSelectedRole] = useState("student");
+  const { signupData, setSignupData } = useSignup();
 
   return (
     <div className="w-[450px] h-[500px] rounded-3xl border-2 border-[#DDD5C8] bg-[#FAF9F8] p-9 shadow-md">
+      
       {/* Stepper */}
       <div className="mb-10">
         <div className="relative flex items-center justify-between">
           <div className="absolute left-4 right-4 top-1/2 h-[2px] -translate-y-1/2 bg-[#D8D2CA]" />
-
           <div className="absolute left-4 top-1/2 h-[2px] w-[90px] -translate-y-1/2 bg-[#F28A3B]" />
 
           <div className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full bg-[#F28A3B] text-sm font-bold text-white">
@@ -43,56 +43,52 @@ export default function SignupRolePage() {
 
       {/* Role Cards */}
       <div className="grid grid-cols-3 gap-4">
+
+        {/* STUDENT */}
         <button
-          onClick={() => setSelectedRole("student")}
+          onClick={() =>
+            setSignupData({ ...signupData, role: "student" })
+          }
           className={`h-[120px] rounded-2xl border flex flex-col items-center justify-center transition ${
-            selectedRole === "student"
+            signupData.role === "student"
               ? "border-[#A65200] bg-[#FFF5EB]"
               : "border-[#D9B9A7]"
           }`}
         >
-          <GraduationCap
-            size={34}
-            className="mb-3 text-[#A65200]"
-          />
-          <span className="font-semibold text-[#2D241C]">
-            Student
-          </span>
+          <GraduationCap size={34} className="mb-3 text-[#A65200]" />
+          <span className="font-semibold text-[#2D241C]">Student</span>
         </button>
 
+        {/* PARENT */}
         <button
-          onClick={() => setSelectedRole("parent")}
+          onClick={() =>
+            setSignupData({ ...signupData, role: "parent" })
+          }
           className={`h-[120px] rounded-2xl border flex flex-col items-center justify-center transition ${
-            selectedRole === "parent"
+            signupData.role === "parent"
               ? "border-[#A65200] bg-[#FFF5EB]"
               : "border-[#D9B9A7]"
           }`}
         >
-          <Users
-            size={34}
-            className="mb-3 text-[#A65200]"
-          />
-          <span className="font-semibold text-[#2D241C]">
-            Parent
-          </span>
+          <Users size={34} className="mb-3 text-[#A65200]" />
+          <span className="font-semibold text-[#2D241C]">Parent</span>
         </button>
 
+        {/* TEACHER */}
         <button
-          onClick={() => setSelectedRole("teacher")}
+          onClick={() =>
+            setSignupData({ ...signupData, role: "teacher" })
+          }
           className={`h-[120px] rounded-2xl border flex flex-col items-center justify-center transition ${
-            selectedRole === "teacher"
+            signupData.role === "teacher"
               ? "border-[#A65200] bg-[#FFF5EB]"
               : "border-[#D9B9A7]"
           }`}
         >
-          <School
-            size={34}
-            className="mb-3 text-[#A65200]"
-          />
-          <span className="font-semibold text-[#2D241C]">
-            Teacher
-          </span>
+          <School size={34} className="mb-3 text-[#A65200]" />
+          <span className="font-semibold text-[#2D241C]">Teacher</span>
         </button>
+
       </div>
 
       {/* Next Button */}

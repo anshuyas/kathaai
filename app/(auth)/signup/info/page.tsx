@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { useSignup } from "@/app/context/SignupContext";
 
 export default function SignupInfoPage() {
+    const { signupData, setSignupData } = useSignup();
   return (
     <div className="w-[450px] h-[500px] rounded-3xl border-2 border-[#DDD5C8] bg-[#FAF9F8] p-9 shadow-md">
       {/* Stepper */}
@@ -44,6 +46,10 @@ export default function SignupInfoPage() {
           <input
             type="text"
             placeholder="Enter your fullname"
+             value={signupData.fullName}
+            onChange={(e) =>
+              setSignupData({ ...signupData, fullName: e.target.value })
+            }
             className="h-12 w-full rounded-xl border border-[#D9B9A7] bg-[#FFF9F1] px-4 text-[#2D241C] outline-none focus:border-[#A65200]"
           />
         </div>
@@ -55,6 +61,10 @@ export default function SignupInfoPage() {
           <input
             type="email"
             placeholder="Enter your email"
+            value={signupData.email}
+            onChange={(e) =>
+              setSignupData({ ...signupData, email: e.target.value })
+            }
             className="h-12 w-full rounded-xl border border-[#D9B9A7] bg-[#FFF9F1] px-4 text-[#2D241C] outline-none focus:border-[#A65200]"
           />
         </div>
