@@ -27,7 +27,11 @@ export default function SignupSuccessPage() {
     setError("");
 
     try {
+      console.log("signupData:", signupData);
+
       const res = await registerUser(signupData);
+
+      console.log("response:", res);
 
       if (!res.success) {
         setError(res.message || "Signup failed");
@@ -36,11 +40,7 @@ export default function SignupSuccessPage() {
 
       setRegistered(true);
 
-      // optional: store token if backend returns later
-      // localStorage.setItem("token", res.token);
-
-      // go to dashboard after success
-      router.push("/dashboard");
+      router.push("/library");
 
     } catch (err) {
       setError("Something went wrong");

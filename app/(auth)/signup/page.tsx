@@ -71,7 +71,8 @@ export default function SignupRolePage() {
           }`}
         >
           <Users size={34} className="mb-3 text-[#A65200]" />
-          <span className="font-semibold text-[#2D241C]">Parent</span>
+          <span className="font-semibold text-[#2D241C]">Parent/
+            Guardian</span>
         </button>
 
         {/* TEACHER */}
