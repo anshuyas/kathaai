@@ -1,3 +1,7 @@
+"use client";
+
+import { useLanguage } from "../context/LanguageContext";
+import { translations } from "../lib/translations";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -17,6 +21,8 @@ import {
 import LanguageDropdown from "../components/LanguageDropdown";
 
 export default function LandingPage() {
+  const { language } = useLanguage();
+const t = translations[language];
   return (
     <main className="bg-[#FFF9EB] min-h-screen text-[#2D2D2D]">
       {/* NAVBAR */}
@@ -26,13 +32,13 @@ export default function LandingPage() {
 
           <div className="hidden md:flex items-center gap-10 text-sm font-medium">
             <Link href="#" className="text-[#B76800]">
-              Home
+              {t.home}
             </Link>
 
-            <Link href="#">Library</Link>
-            <Link href="#">Create</Link>
-            <Link href="#">My Stories</Link>
-            <Link href="#">Dashboard</Link>
+            <Link href="/library">{t.library}</Link>
+            <Link href="#">{t.create}</Link>
+            <Link href="#">{t.myStories}</Link>
+            <Link href="#">{t.dashboard}</Link>
           </div>
 
           <LanguageDropdown />
