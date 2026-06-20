@@ -105,7 +105,7 @@ setStatus("completed");
               {t.create}
             </Link>
 
-            <Link href="/stories">
+            <Link href="/my-stories">
               {t.myStories}
             </Link>
 

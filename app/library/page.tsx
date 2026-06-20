@@ -40,7 +40,7 @@ const t = translations[language];
       </Link>
 
       <Link href="/create">{t.create}</Link>
-      <Link href="/stories">{t.myStories}</Link>
+      <Link href="/my-stories">{t.myStories}</Link>
       <Link href="/dashboard">{t.dashboard}</Link>
       
     </div>

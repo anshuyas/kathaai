@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 
 interface Scene {
   sceneNo: number;
@@ -16,17 +16,23 @@ interface Story {
   scenes: Scene[];
 }
 
-export default function StoryPage({ params }: any) {
+export default function StoryPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const [story, setStory] = useState<Story | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentScene, setCurrentScene] = useState(0);
+  const { id } = use(params);
 
   useEffect(() => {
     const fetchStory = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/story/${params.id}`);
+        const res = await fetch(`http://localhost:5000/api/story/${id}`);
         const data = await res.json();
-        setStory(data);
+        console.log("STORY API:", data);
+        setStory(data.data);
       } catch (err) {
         console.error("Error loading story:", err);
       } finally {
@@ -35,7 +41,7 @@ export default function StoryPage({ params }: any) {
     };
 
     fetchStory();
-  }, [params.id]);
+  }, [id]);
 
   if (loading) return <div>Loading story...</div>;
   if (!story) return <div>No story found</div>;
