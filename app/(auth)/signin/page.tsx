@@ -32,9 +32,10 @@ export default function SignInPage() {
 
       // store token
       localStorage.setItem("token", res.token);
+localStorage.setItem("role", res.user.role);
 
-      // redirect
-      router.push("/library");
+// Go to the dashboard router
+router.push("/dashboard");
     } catch (err: any) {
       setError("Something went wrong");
     } finally {

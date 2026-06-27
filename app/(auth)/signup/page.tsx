@@ -94,14 +94,24 @@ export default function SignupRolePage() {
 
       {/* Next Button */}
       <div className="mt-10 flex justify-end">
-        <Link
-          href="/signup/info"
-          className="flex h-12 w-[140px] items-center justify-center gap-2 rounded-xl bg-[#A65200] font-semibold text-white transition hover:bg-[#8e4700]"
-        >
-          Next Step
-          <ArrowRight size={18} />
-        </Link>
-      </div>
+  <Link
+    href={signupData.role ? "/signup/info" : "#"}
+    onClick={(e) => {
+      if (!signupData.role) {
+        e.preventDefault();
+        alert("Please select a role first.");
+      }
+    }}
+    className={`flex h-12 w-[140px] items-center justify-center gap-2 rounded-xl font-semibold text-white transition ${
+      signupData.role
+        ? "bg-[#A65200] hover:bg-[#8e4700]"
+        : "cursor-not-allowed bg-gray-400"
+    }`}
+  >
+    Next Step
+    <ArrowRight size={18} />
+  </Link>
+</div>
     </div>
   );
 }
