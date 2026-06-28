@@ -47,11 +47,21 @@ export default function StoryPage({
   const [mode, setMode] = useState<
   "video" | "reading"
 >("video");
-const [score, setScore] = useState(0);
-const [selectedAnswers, setSelectedAnswers] =
-  useState<Record<number, string>>({});
   const [playbackSpeed, setPlaybackSpeed] =
   useState(1);
+  const [sessionId, setSessionId] = useState("");
+const [startTime] = useState(Date.now());
+const [storyCompleted, setStoryCompleted] = useState(false);
+const [showQuiz, setShowQuiz] = useState(false);
+
+const [selectedAnswers, setSelectedAnswers] =
+  useState<Record<number, string>>({});
+
+const [quizSubmitted, setQuizSubmitted] =
+  useState(false);
+
+const [score, setScore] = useState(0);
+
 
   useEffect(() => {
     const fetchStory = async () => {
@@ -60,6 +70,41 @@ const [selectedAnswers, setSelectedAnswers] =
         const data = await res.json();
         console.log("STORY API:", data);
         setStory(data.data);
+        const token = localStorage.getItem("token");
+
+const payload = JSON.parse(atob(token!.split(".")[1]));
+console.log({
+  userId: payload.id,
+  storyId: id,
+});
+
+const readingRes = await fetch(
+  "http://localhost:5000/api/reading/start",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      userId: payload.id,
+      storyId: id,
+    }),
+  }
+);
+
+console.log("STATUS:", readingRes.status);
+
+const text = await readingRes.text();
+
+console.log("RAW RESPONSE:");
+console.log(text);
+
+const readingData = JSON.parse(text);
+
+console.log("PARSED:");
+console.log(readingData);
+
+setSessionId(readingData.data._id);
       } catch (err) {
         console.error("Error loading story:", err);
       } finally {
@@ -75,6 +120,69 @@ const [selectedAnswers, setSelectedAnswers] =
 
     const scene = story.scenes[currentScene];
     console.log(scene.imageUrl);
+    
+const submitQuiz = async () => {
+  console.log("QUIZ DATA:");
+console.log(JSON.stringify(story.quiz, null, 2));
+ let total = 0;
+
+story.quiz.forEach((q, index) => {
+  if (selectedAnswers[index] === q.answer) {
+    total += 2;
+  }
+});
+
+console.log("FINAL TOTAL:", total);
+
+  setScore(total);
+
+  if (!sessionId) {
+    console.error("No reading session found");
+    return;
+  }
+
+  try {
+    // finish reading session
+    await fetch("http://localhost:5000/api/reading/finish", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sessionId,
+        duration: Math.floor((Date.now() - startTime) / 1000),
+      }),
+    });
+
+    console.log("Selected Answers:", selectedAnswers);
+console.log("Quiz:", story.quiz);
+console.log("Total:", total);
+
+console.log({
+  sessionId,
+  score: total,
+  pointsEarned: total * 10,
+});
+
+    // save quiz score + earned points
+    await fetch("http://localhost:5000/api/user/quiz-score", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sessionId,
+        score: total,
+        pointsEarned: total * 10,
+      }),
+    });
+
+    setQuizSubmitted(true);
+  } catch (err) {
+    console.error(err);
+  }
+};
+    
 
   return (
   <main className="min-h-screen bg-[#F7F1E7]">
@@ -153,11 +261,32 @@ const [selectedAnswers, setSelectedAnswers] =
       </button>
 
 <button
-  onClick={() =>
-    setCurrentScene((prev) =>
-      Math.min(prev + 1, story.scenes.length - 1)
-    )
+  onClick={async () => {
+  if (currentScene < story.scenes.length - 1) {
+    setCurrentScene(currentScene + 1);
+    return;
   }
+
+  const duration = Math.floor(
+    (Date.now() - startTime) / 1000
+  );
+
+  await fetch(
+    "http://localhost:5000/api/reading/finish",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sessionId,
+        duration,
+      }),
+    }
+  );
+
+setStoryCompleted(true);
+}}
   className="mt-6 rounded-xl bg-[#B35A00] px-6 py-3 text-white"
 >
   Next Scene
@@ -248,6 +377,8 @@ const [selectedAnswers, setSelectedAnswers] =
 )}
 
       {/* QUIZ SECTION */}
+{storyCompleted && (
+
 <div className="mx-auto mt-12 max-w-6xl rounded-[32px] p-10">
 <h2 className="mb-8 text-center text-3xl font-black">
       STORY QUIZ
@@ -257,49 +388,71 @@ const [selectedAnswers, setSelectedAnswers] =
 
   <div className="grid grid-cols-12 gap-8">
 
-    {/* LEFT SIDE - QUESTIONS */}
-    <div className="col-span-8">
+   {/* LEFT SIDE - QUESTIONS */}
+<div className="col-span-8">
 
-      <div className="space-y-10">
-        {story.quiz.map((q: any, index: number) => (
-          <div key={index}>
+  <div className="space-y-10">
 
-            <h3 className="mb-5 text-2xl font-semibold text-[#17221A]">
-              {index + 1}. {q.question}
-            </h3>
-            
+    {story.quiz.map((q: Quiz, index: number) => (
 
-            <div className="space-y-4">
-              {q.options.map(
-  (option: string, optionIndex: number) => (
-    <button
-      key={optionIndex}
-      onClick={() => {
-        setSelectedAnswers({
-          ...selectedAnswers,
-          [index]: option,
-        });
+      <div key={index}>
 
-        if (
-          !selectedAnswers[index] &&
-          option.startsWith(q.answer)
-        ) {
-          setScore((prev) => prev + 2);
-        }
-      }}
-      className="max-w-[650px] w-full rounded-lg border border-[#7D8A78] bg-[#F3EFE7] px-5 py-4 text-left text-lg transition hover:bg-[#ECE5D7]"
-    >
-      {option}
-    </button>
-  )
-)}
-            </div>
+        <h3 className="mb-5 text-2xl font-semibold text-[#17221A]">
+          {index + 1}. {q.question}
+        </h3>
 
-          </div>
-        ))}
+        <div className="space-y-4">
+
+          {q.options.map((option: string, optionIndex: number) => (
+
+            <button
+              key={optionIndex}
+              disabled={quizSubmitted}
+              onClick={() =>
+                setSelectedAnswers({
+                  ...selectedAnswers,
+                  [index]: option,
+                })
+              }
+              className={`max-w-[650px] w-full rounded-lg border px-5 py-4 text-left text-lg transition
+
+              ${
+                selectedAnswers[index] === option
+                  ? "border-[#B35A00] bg-[#F28A3B] text-white"
+                  : "border-[#7D8A78] bg-[#F3EFE7] hover:bg-[#ECE5D7]"
+              }
+
+              ${
+                quizSubmitted
+                  ? "cursor-not-allowed opacity-80"
+                  : ""
+              }
+              `}
+            >
+              {option}
+            </button>
+
+          ))}
+
+        </div>
+
       </div>
 
-    </div>
+    ))}
+
+    {/* Submit Button */}
+
+    {!quizSubmitted && (
+
+      <button
+        onClick={submitQuiz}
+        className="mt-8 rounded-xl bg-[#2E8B57] px-10 py-4 text-xl font-semibold text-white transition hover:bg-[#256F45]"
+      >
+        Submit Quiz
+      </button>
+
+    )}
+
 
     {/* RIGHT SIDE PANEL */}
     <div className="col-span-4 space-y-5">
@@ -360,10 +513,11 @@ const [selectedAnswers, setSelectedAnswers] =
       </div>
 
     </div>
-
   </div>
-
-</div>
+  </div>
+  </div>
+  </div>
+)}
   </main>
 );
 }
