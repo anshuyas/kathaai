@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { User } from "lucide-react";
+import { LogOut, User } from "lucide-react";
 
 import LanguageDropdown from "@/app/components/LanguageDropdown";
 
@@ -12,13 +12,28 @@ import DailyChallenge from "@/app/components/DailyChallenge";
 import StatsCards from "@/app/components/StatsCards";
 import { translations } from "@/app/lib/translations";
 import { useLanguage } from "@/app/context/LanguageContext";
+import AuthGuard from "@/app/components/AuthGuard";
+import { useRouter } from "next/navigation";
+import { getCurrentUser } from "@/app/utils/auth";
+import { useState } from "react";
 
 
 export default function ParentDashboard() {
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  
+  const router = useRouter();
+  
+  const user = getCurrentUser();
+  
+  const logout = () => {
+    localStorage.removeItem("token");
+    router.push("/");
+  };
     const { language } = useLanguage();
     const t = translations[language];
 
   return (
+    <AuthGuard roles={["parent", "student"]}>
     <main className="min-h-screen bg-[#F7F1E7]">
 
       {/* NAVBAR */}
@@ -52,9 +67,40 @@ export default function ParentDashboard() {
           <div className="flex items-center gap-3">
             <LanguageDropdown />
 
-            <button className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F28A3B]">
-              <User size={18} />
-            </button>
+           <div className="relative">
+
+  <button
+    onClick={() => setShowProfileMenu(!showProfileMenu)}
+    className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F28A3B] text-white transition hover:scale-105"
+  >
+    <User size={18} />
+  </button>
+
+  {showProfileMenu && (
+    <div className="absolute right-0 mt-3 w-64 rounded-2xl border border-[#E8DDCF] bg-white p-5 shadow-xl z-50">
+
+      <div>
+        <h3 className="text-lg font-bold text-[#2D241C]">
+          {user?.fullName}
+        </h3>
+
+        <p className="mt-1 text-sm capitalize text-[#7B7269]">
+          {user?.role}
+        </p>
+      </div>
+
+      <div className="my-4 h-px bg-[#ECE3D6]" />
+
+      <button
+        onClick={logout}
+        className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-red-600 transition hover:bg-red-50"
+      >
+        <LogOut size={18} />
+        Logout
+      </button>
+</div>
+  )}
+    </div>
           </div>
         </div>
       </header>
@@ -139,5 +185,6 @@ export default function ParentDashboard() {
       </section>
 
     </main>
+    </AuthGuard>
   );
 }

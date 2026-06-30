@@ -34,8 +34,14 @@ export default function SignInPage() {
       localStorage.setItem("token", res.token);
 localStorage.setItem("role", res.user.role);
 
-// Go to the dashboard router
-router.push("/dashboard");
+if (res.user.role === "teacher") {
+  router.push("/teacher");
+} else if (res.user.role === "parent") {
+  router.push("/parent");
+} else {
+  // student
+  router.push("/library"); 
+}
     } catch (err: any) {
       setError("Something went wrong");
     } finally {

@@ -2,7 +2,7 @@
 
 import { useLanguage } from "../context/LanguageContext";
 import { translations } from "../lib/translations";
-
+import AuthGuard from "../components/AuthGuard";
 import Link from "next/link";
 import {
   ChevronDown,
@@ -13,6 +13,9 @@ import {
 import { useRef, useState } from "react";
 import LanguageDropdown from "../components/LanguageDropdown";
 import CustomDropdown from "../components/CustomDropdowm";
+import {LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { getCurrentUser } from "../utils/auth";
 
 export default function CreatePage() {
     const { language } = useLanguage();
@@ -32,6 +35,16 @@ const [selectedHero, setSelectedHero] = useState({
   image: "/images/aarav.png",
   voice: "Kid Voice",
 });
+const [showProfileMenu, setShowProfileMenu] = useState(false);
+
+const router = useRouter();
+
+const user = getCurrentUser();
+
+const logout = () => {
+  localStorage.removeItem("token");
+  router.push("/");
+};
 const [submitted, setSubmitted] = useState(false);
   const [generatedStory, setGeneratedStory] = useState<any>(null);
   const [selectedLanguage, setSelectedLanguage] =
@@ -126,6 +139,7 @@ const requestApproval = async () => {
 };
 
   return (
+     <AuthGuard roles={["student", "parent"]}>
     <main className="min-h-screen bg-[#FFF9EB]">
       {/* HEADER */}
       <header className="border-b border-[#ece4d2]">
@@ -158,9 +172,42 @@ const requestApproval = async () => {
           <div className="flex items-center gap-3">
             <LanguageDropdown />
 
-            <button className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F28A3B]">
-              <User size={18} />
-            </button>
+            <div className="relative">
+
+  <button
+    onClick={() => setShowProfileMenu(!showProfileMenu)}
+    className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F28A3B] text-white transition hover:scale-105"
+  >
+    <User size={18} />
+  </button>
+
+  {showProfileMenu && (
+    <div className="absolute right-0 mt-3 w-64 rounded-2xl border border-[#E8DDCF] bg-white p-5 shadow-xl z-50">
+
+      <div>
+        <h3 className="text-lg font-bold text-[#2D241C]">
+          {user?.fullName}
+        </h3>
+
+        <p className="mt-1 text-sm capitalize text-[#7B7269]">
+          {user?.role}
+        </p>
+      </div>
+
+      <div className="my-4 h-px bg-[#ECE3D6]" />
+
+      <button
+        onClick={logout}
+        className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-red-600 transition hover:bg-red-50"
+      >
+        <LogOut size={18} />
+        Logout
+      </button>
+
+    </div>
+  )}
+
+</div>
           </div>
         </div>
       </header>
@@ -644,5 +691,6 @@ const requestApproval = async () => {
 )}
 
     </main>
+    </AuthGuard>
   );
 }

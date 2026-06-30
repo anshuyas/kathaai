@@ -6,6 +6,7 @@ import {
   Download,
 } from "lucide-react";
 import Link from "next/link";
+import AuthGuard from "@/app/components/AuthGuard";
 
 interface Scene {
   sceneNo: number;
@@ -210,6 +211,7 @@ const downloadStory = async () => {
 };
 
   return (
+    <AuthGuard roles={["student", "parent"]}>
   <main className="min-h-screen bg-[#F7F1E7]">
   <div className="mx-auto max-w-6xl px-6 py-8">
 
@@ -658,5 +660,6 @@ setStoryCompleted(true);
   </div>
 )}
   </main>
+  </AuthGuard>
 );
 }
