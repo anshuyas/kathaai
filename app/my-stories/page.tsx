@@ -26,7 +26,15 @@ export default function MyStoriesPage() {
   useEffect(() => {
     const fetchStories = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/story");
+       const token = localStorage.getItem("token");
+
+if (!token) return;
+
+const payload = JSON.parse(atob(token.split(".")[1]));
+
+const res = await fetch(
+  `http://localhost:5000/api/story/my/${payload.id}`
+);
         const data = await res.json();
         setStories(data.data || []);
       } catch (error) {

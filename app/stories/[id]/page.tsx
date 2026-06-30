@@ -187,6 +187,27 @@ console.log({
 };
     
 const q = story.quiz[currentQuestion];
+const downloadStory = async () => {
+  try {
+    const res = await fetch(
+      `http://localhost:5000/api/story/${story._id}/download`,
+      {
+        method: "PATCH",
+      }
+    );
+
+    const data = await res.json();
+
+    if (data.success) {
+      alert("Story downloaded for offline reading!");
+
+      // Update UI immediately
+      setStory(data.data);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   return (
   <main className="min-h-screen bg-[#F7F1E7]">
@@ -205,18 +226,14 @@ const q = story.quiz[currentQuestion];
   </div>
 
   <button
-  onClick={async () => {
-    await fetch(
-      `http://localhost:5000/api/story/${story._id}/download`,
-      {
-        method: "PATCH",
-      }
-    );
-  }}
-  className="flex items-center gap-2 rounded-xl bg-[#EF7F8F] px-6 py-3 font-medium text-white shadow"
+  onClick={downloadStory}
+  className="flex items-center gap-2 rounded-xl bg-[#EF7F8F] px-6 py-3 font-medium text-white shadow hover:bg-[#E46D7D]"
 >
   <Download size={18} />
-  Download for Offline
+
+  {story.downloaded
+    ? "Downloaded"
+    : "Download for Offline"}
 </button>
 </div>
 

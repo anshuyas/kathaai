@@ -13,6 +13,12 @@ interface Story {
   createdAt: string;
   coverImage?: string;
 
+  userId?: {
+    _id: string;
+    fullName: string;
+    email: string;
+  };
+
   scenes: {
     imageUrl?: string;
   }[];
@@ -168,7 +174,7 @@ const rejectStory = async (id: string) => {
                 </p>
 
                 <p className="mt-1 text-sm text-[#9A9085]">
-                  by {story.heroName}
+                  by {story.userId?.fullName || "Unknown Author"}
                 </p>
 
               </div>

@@ -54,6 +54,15 @@ const [
   try {
     setStatus("generating");
 
+    const token = localStorage.getItem("token");
+
+if (!token) {
+  alert("Please login first.");
+  return;
+}
+
+const payload = JSON.parse(atob(token.split(".")[1]));
+
     const response = await fetch(
       "http://localhost:5000/api/ai/generate-story",
       {
@@ -62,16 +71,20 @@ const [
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          prompt: story,
-          language: selectedLanguage,
-          ageGroup: selectedAge,
-            storyLength: selectedLength,
-            genre: selectedGenre,
-            learningGoal: selectedLearningGoal,
-            heroImage: customHero, 
-              heroName: selectedHero.name,
+  prompt: story,
+
+  userId: payload.id,
+
+  language: selectedLanguage,
+  ageGroup: selectedAge,
+  storyLength: selectedLength,
+  genre: selectedGenre,
+  learningGoal: selectedLearningGoal,
+
+  heroImage: customHero,
+  heroName: selectedHero.name,
   heroVoice: selectedHero.voice,
-        }),
+}),
       }
     );
 
