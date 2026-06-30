@@ -5,6 +5,7 @@ import {
   Settings,
   Download,
 } from "lucide-react";
+import Link from "next/link";
 
 interface Scene {
   sceneNo: number;
@@ -53,6 +54,8 @@ export default function StoryPage({
 const [startTime] = useState(Date.now());
 const [storyCompleted, setStoryCompleted] = useState(false);
 const [showQuiz, setShowQuiz] = useState(false);
+const [currentQuestion, setCurrentQuestion] = useState(0);
+const [quizFinished, setQuizFinished] = useState(false);
 
 const [selectedAnswers, setSelectedAnswers] =
   useState<Record<number, string>>({});
@@ -183,6 +186,7 @@ console.log({
   }
 };
     
+const q = story.quiz[currentQuestion];
 
   return (
   <main className="min-h-screen bg-[#F7F1E7]">
@@ -355,167 +359,285 @@ setStoryCompleted(true);
 
    /* READING MODE */
 
-  <div className="mx-auto mt-8 max-w-4xl space-y-8">
+  <div className="mx-auto mt-8 max-w-4xl">
 
-    {story.scenes.map((scene) => (
-      <div
-        key={scene.sceneNo}
-        className="rounded-3xl bg-white p-8 shadow-sm"
+  <div className="rounded-3xl bg-white p-8 shadow-sm">
+
+    <img
+      src={story.scenes[currentScene].imageUrl}
+      alt=""
+      className="mb-8 h-[420px] w-full rounded-3xl object-cover"
+    />
+
+    <h2 className="text-2xl font-bold">
+      Scene {story.scenes[currentScene].sceneNo}
+    </h2>
+
+    <p className="mt-6 text-xl leading-10 text-[#3D342C]">
+      {story.scenes[currentScene].text}
+    </p>
+
+    <div className="mt-10 flex justify-between">
+
+      <button
+        disabled={currentScene === 0}
+        onClick={() =>
+          setCurrentScene(currentScene - 1)
+        }
+        className="rounded-xl border px-6 py-3 disabled:opacity-40"
       >
-        <h2 className="text-2xl font-bold">
-          Scene {scene.sceneNo}
-        </h2>
+        Previous
+      </button>
 
-        <p className="mt-5 text-lg leading-9 text-[#3D342C]">
-          {scene.text}
-        </p>
-      </div>
-    ))}
+      <button
+        onClick={() => {
+          if (
+            currentScene <
+            story.scenes.length - 1
+          ) {
+            setCurrentScene(currentScene + 1);
+          } else {
+            setStoryCompleted(true);
+          }
+        }}
+        className="rounded-xl bg-[#A65200] px-6 py-3 text-white"
+      >
+        {currentScene === story.scenes.length - 1
+          ? "Finish Story"
+          : "Next"}
+      </button>
+
+    </div>
 
   </div>
+  {/* PROGRESS */}
+      <div className="mx-auto mt-8 max-w-5xl">
+
+  <div className="rounded-2xl bg-[#C8F0CD] p-6">
+
+    <div className="mb-3 flex items-center justify-between">
+
+      <h3 className="text-lg font-bold">
+        Story Progress
+      </h3>
+
+      <span className="font-semibold">
+        {Math.round(
+          ((currentScene + 1) /
+            story.scenes.length) *
+            100
+        )}
+        %
+      </span>
+
+    </div>
+
+    <div className="h-4 rounded-full bg-[#DFF5E2]">
+
+      <div
+        className="h-4 rounded-full bg-[#2E8B57]"
+        style={{
+          width: `${
+            ((currentScene + 1) /
+              story.scenes.length) *
+            100
+          }%`,
+        }}
+      />
+
+    </div>
+
+  </div>
+</div>
+
+</div>
 
 )}
 
-      {/* QUIZ SECTION */}
+{/* QUIZ SECTION */}
 {storyCompleted && (
+  <div className="mx-auto mt-16 max-w-4xl">
 
-<div className="mx-auto mt-12 max-w-6xl rounded-[32px] p-10">
-<h2 className="mb-8 text-center text-3xl font-black">
-      STORY QUIZ
-  </h2>
+    {/* Heading */}
 
-  <div className="mb-8 h-[2px] bg-[#6B8F6B]" />
+    <div className="mb-10 text-center">
 
-  <div className="grid grid-cols-12 gap-8">
+      <h2 className="text-4xl font-black">
+        🧠 Story Challenge
+      </h2>
 
-   {/* LEFT SIDE - QUESTIONS */}
-<div className="col-span-8">
+      <p className="mt-3 text-lg text-[#6D6258]">
+        Can you remember what happened in the story?
+      </p>
 
-  <div className="space-y-10">
+    </div>
 
-    {story.quiz.map((q: Quiz, index: number) => (
+    {/* Progress */}
 
-      <div key={index}>
+    <div className="mb-8 h-3 overflow-hidden rounded-full bg-[#E9DED0]">
 
-        <h3 className="mb-5 text-2xl font-semibold text-[#17221A]">
-          {index + 1}. {q.question}
-        </h3>
+      <div
+        className="h-full rounded-full bg-[#A65200] transition-all duration-300"
+        style={{
+          width: `${((currentQuestion + 1) / story.quiz.length) * 100}%`,
+        }}
+      />
 
-        <div className="space-y-4">
+    </div>
 
-          {q.options.map((option: string, optionIndex: number) => (
+    {/* Quiz Card */}
+
+    <div className="rounded-[32px] bg-white p-10 shadow-sm">
+
+      <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-[#A65200]">
+
+        Question {currentQuestion + 1} of {story.quiz.length}
+
+      </p>
+
+      <h3 className="mb-8 text-3xl font-bold leading-snug">
+
+        {story.quiz[currentQuestion].question}
+
+      </h3>
+
+      <div className="space-y-4">
+
+        {story.quiz[currentQuestion].options.map(
+          (option: string, index: number) => (
 
             <button
-              key={optionIndex}
+              key={index}
               disabled={quizSubmitted}
               onClick={() =>
                 setSelectedAnswers({
                   ...selectedAnswers,
-                  [index]: option,
+                  [currentQuestion]: option,
                 })
               }
-              className={`max-w-[650px] w-full rounded-lg border px-5 py-4 text-left text-lg transition
+              className={`w-full rounded-2xl border px-6 py-5 text-left text-lg transition
 
               ${
-                selectedAnswers[index] === option
-                  ? "border-[#B35A00] bg-[#F28A3B] text-white"
-                  : "border-[#7D8A78] bg-[#F3EFE7] hover:bg-[#ECE5D7]"
-              }
-
-              ${
-                quizSubmitted
-                  ? "cursor-not-allowed opacity-80"
-                  : ""
+                selectedAnswers[currentQuestion] === option
+                  ? "border-[#F28A3B] bg-[#F28A3B] text-white"
+                  : "border-[#DDD2C4] bg-[#F9F4EC] hover:bg-[#EFE5D8]"
               }
               `}
             >
               {option}
             </button>
 
-          ))}
-
-        </div>
-
-      </div>
-
-    ))}
-
-    {/* Submit Button */}
-
-    {!quizSubmitted && (
-
-      <button
-        onClick={submitQuiz}
-        className="mt-8 rounded-xl bg-[#2E8B57] px-10 py-4 text-xl font-semibold text-white transition hover:bg-[#256F45]"
-      >
-        Submit Quiz
-      </button>
-
-    )}
-
-
-    {/* RIGHT SIDE PANEL */}
-    <div className="col-span-4 space-y-5">
-
-      {/* SCORE CARD */}
-      <div className="rounded-2xl bg-[#F5D8C7] p-6 shadow-sm">
-        <p className="text-sm uppercase text-[#5F5348]">
-          Current Score
-        </p>
-
-        <div className="mt-2 text-4xl font-bold text-[#2D241C]">
-          {score}/10
-        </div>
-      </div>
-
-      {/* EARN POINTS CARD */}
-      <div className="rounded-2xl border border-[#8FD49C] bg-[#C8F0CD] p-8 text-center">
-
-        <p className="text-sm uppercase text-[#4F7B57]">
-          Earn Points
-        </p>
-
-        <div className="my-4 text-5xl">
-          ⭐
-        </div>
-
-        <p className="text-xl font-semibold text-[#1E3322]">
-          Complete the story
-          <br />
-          to unlock more!
-        </p>
+          )
+        )}
 
       </div>
 
-      {/* SHARE + SAVE CARD */}
-      <div className="rounded-2xl bg-[#F5D8C7] p-6">
+      {/* Navigation */}
 
-        <p className="mb-5 text-center text-sm uppercase text-[#5F5348]">
-          Share & Save
-        </p>
+      <div className="mt-10 flex items-center justify-between">
 
-        <div className="flex justify-around text-3xl">
+        <button
+          disabled={currentQuestion === 0}
+          onClick={() =>
+            setCurrentQuestion(currentQuestion - 1)
+          }
+          className="rounded-xl border border-[#D7C9B8] px-6 py-3 disabled:opacity-40"
+        >
+          ← Previous
+        </button>
 
-          <button className="transition hover:scale-110">
-            🔗
-          </button>
+        {currentQuestion < story.quiz.length - 1 ? (
 
-          <button className="transition hover:scale-110">
-            💬
-          </button>
+          <button
+  disabled={!selectedAnswers[currentQuestion]}
+  onClick={() =>
+    setCurrentQuestion(currentQuestion + 1)
+  }
+  className={`rounded-xl px-8 py-3 text-white transition
 
-          <button className="transition hover:scale-110">
-            ⬇️
-          </button>
+  ${
+    selectedAnswers[currentQuestion]
+      ? "bg-[#A65200] hover:bg-[#8C4500]"
+      : "cursor-not-allowed bg-gray-300"
+  }
+  `}
+>
+  Next →
+</button>
 
-        </div>
+        ) : (
+
+          <button
+  disabled={!selectedAnswers[currentQuestion]}
+  onClick={submitQuiz}
+  className={`rounded-xl px-8 py-3 text-white transition
+
+  ${
+    selectedAnswers[currentQuestion]
+      ? "bg-[#2E8B57] hover:bg-[#256F45]"
+      : "cursor-not-allowed bg-gray-300"
+  }
+  `}
+>
+  Submit Quiz
+</button>
+
+        )}
 
       </div>
 
     </div>
-  </div>
-  </div>
-  </div>
+
+    {/* Result */}
+
+    {quizSubmitted && (
+
+      <div className="mt-10 rounded-[32px] bg-white p-10 text-center shadow-sm">
+
+        <div className="text-6xl">
+          🎉
+        </div>
+
+        <h2 className="mt-5 text-4xl font-black">
+          Great Job!
+        </h2>
+
+        <p className="mt-4 text-xl text-[#666]">
+          You scored
+        </p>
+
+        <div className="mt-3 text-6xl font-black text-[#2E8B57]">
+
+          {score}/10
+
+        </div>
+
+        <p className="mt-5 text-lg text-[#666]">
+          Keep reading stories to earn more points and improve your skills!
+        </p>
+
+        <div className="mt-10 flex justify-center gap-4">
+
+          <button
+            onClick={() => window.location.reload()}
+            className="rounded-xl border border-[#D7C9B8] px-6 py-3"
+          >
+            📖 Read Again
+          </button>
+
+          <Link
+            href="/library"
+            className="rounded-xl bg-[#A65200] px-6 py-3 text-white"
+          >
+            📚 Back to Library
+          </Link>
+
+        </div>
+
+      </div>
+
+    )}
+
   </div>
 )}
   </main>
