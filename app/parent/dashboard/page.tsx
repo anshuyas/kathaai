@@ -10,61 +10,55 @@ import WeekComparison from "@/app/components/WeekComparison";
 import RecentBadges from "@/app/components/Badges";
 import DailyChallenge from "@/app/components/DailyChallenge";
 import StatsCards from "@/app/components/StatsCards";
+import { translations } from "@/app/lib/translations";
+import { useLanguage } from "@/app/context/LanguageContext";
+
 
 export default function ParentDashboard() {
+    const { language } = useLanguage();
+    const t = translations[language];
+
   return (
     <main className="min-h-screen bg-[#F7F1E7]">
 
       {/* NAVBAR */}
 
-      <nav className="border-b border-[#ECE4D2]">
+     <header className="border-b border-[#ece4d2]">
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-8">
-
           <h1 className="text-3xl font-black text-[#9A4D00]">
             कथाAI
           </h1>
 
           <div className="hidden items-center gap-10 text-sm font-medium md:flex">
+            <Link href="/">{t.home}</Link>
 
-            <Link href="/">
-              Home
-            </Link>
-
-            <Link href="/library">
-              Library
-            </Link>
-
-            <Link href="/create">
-              Create
-            </Link>
-
-            <Link href="/stories">
-              My Stories
-            </Link>
+            <Link href="/library">{t.library}</Link>
 
             <Link
-              href="/dashboard"
-              className="text-[#B76800]"
+              href="/create"
             >
-              Dashboard
+              {t.create}
             </Link>
 
+            <Link href="/my-stories">
+              {t.myStories}
+            </Link>
+
+            <Link href="/dashboard" className="text-[#B76800]">
+                {t.dashboard}
+            </Link>
           </div>
 
           <div className="flex items-center gap-3">
-
             <LanguageDropdown />
 
             <button className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F28A3B]">
-
               <User size={18} />
-
             </button>
-
           </div>
-
         </div>
-      </nav>
+      </header>
+
 
       {/* BODY */}
 

@@ -32,6 +32,7 @@ const [selectedHero, setSelectedHero] = useState({
   image: "/images/aarav.png",
   voice: "Kid Voice",
 });
+const [submitted, setSubmitted] = useState(false);
   const [generatedStory, setGeneratedStory] = useState<any>(null);
   const [selectedLanguage, setSelectedLanguage] =
   useState("English");
@@ -76,6 +77,8 @@ const [
 
     const data = await response.json();
 
+    console.log(data.data);
+
    setGeneratedStory(data.data);
 
 setStatus("completed");
@@ -84,6 +87,31 @@ setStatus("completed");
     setStatus("idle");
   }
 };
+
+const requestApproval = async () => {
+  if (!generatedStory) {
+    alert("Generate a story first.");
+    return;
+  }
+
+  try {
+    const res = await fetch(
+      `http://localhost:5000/api/story/${generatedStory._id}/submit`,
+      {
+        method: "PATCH",
+      }
+    );
+
+    const data = await res.json();
+
+    if (data.success) {
+      setSubmitted(true);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+};
+
   return (
     <main className="min-h-screen bg-[#FFF9EB]">
       {/* HEADER */}
@@ -417,7 +445,7 @@ setStatus("completed");
 )}
         </div>
 
-        {/* RIGHT PANEL */}
+         {/* RIGHT PANEL */}
         <div className="rounded-[32px] border border-[#E3CDBB] bg-[#F8F1E5] p-6">
           <h2 className="text-[20px] font-medium">
             Your Story
@@ -433,20 +461,56 @@ setStatus("completed");
           ) : (
             <div className="mt-6 overflow-hidden rounded-[28px] bg-white">
               <img
-                src="/images/story-cover.jpg"
-                alt=""
-                className="h-[650px] w-full object-cover"
+                 src={
+        generatedStory?.coverImage ||
+        generatedStory?.scenes?.[0]?.imageUrl
+      }
+      alt={generatedStory?.title}
+      className="h-[650px] w-full object-cover"
               />
             </div>
           )}
+
+          {/* Bottom Area */}
+  {status === "completed" && (
+    <div className="mt-6">
+           {!submitted ? (
+        <button
+          onClick={() => {
+    console.log("clicked");
+    requestApproval();
+  }}
+  className="mt-6 w-full rounded-2xl bg-[#A65200] py-4 text-white"
+>
+          Request Approval
+        </button>
+      ) : (
+        <div className="rounded-3xl bg-white p-6 text-center shadow">
+          ✅ Story Submitted!
+         
+      <p className="mt-2 text-[#666]">
+        Your story has been sent to your teacher for review.
+      </p>
+
+      <div className="mt-5 inline-block rounded-full bg-yellow-100 px-4 py-2 font-semibold text-yellow-800">
+        ⏳ Pending Approval
+      </div>
+
+      <Link
+        href="/my-stories"
+        className="mt-6 block rounded-xl bg-[#A65200] py-3 text-center text-white hover:bg-[#8d4600]"
+      >
+        View My Stories →
+      </Link>
+
+    </div>
+      )}
+  </div>
+)}
         </div>
       </section>
 
-      <div className="flex justify-end px-8 pb-10">
-        <button className="rounded-2xl bg-[#A65200] px-10 py-4 text-white">
-          Request Approval
-        </button>
-      </div>
+    
 
       {showHeroModal && (
   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
