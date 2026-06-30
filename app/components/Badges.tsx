@@ -1,7 +1,20 @@
 "use client";
 
+import { BookOpen, Brain, Coins, Compass, GraduationCap, Heart, MicVocal, Sparkles, Star, Trophy } from "lucide-react";
 import { useState } from "react";
-import {
+
+interface Badge {
+  title: string;
+  icon: string;
+  bg: string;
+  color: string;
+}
+
+interface Props {
+  badges: Badge[];
+}
+
+const iconMap = {
   Compass,
   MicVocal,
   GraduationCap,
@@ -11,67 +24,13 @@ import {
   Heart,
   Trophy,
   Sparkles,
-} from "lucide-react";
+  Coins,
+};
 
-const badges = [
-  {
-    title: "Story Explorer",
-    icon: Compass,
-    bg: "#A7F0B3",
-    color: "#156C39",
-  },
-  {
-    title: "Quiz Master",
-    icon: MicVocal,
-    bg: "#FFD3E2",
-    color: "#C2185B",
-  },
-  {
-    title: "Top Learner",
-    icon: GraduationCap,
-    bg: "#FFDCC5",
-    color: "#A65200",
-  },
-  {
-    title: "Book Lover",
-    icon: BookOpen,
-    bg: "#D9E8FF",
-    color: "#2463C9",
-  },
-  {
-    title: "Creative Thinker",
-    icon: Brain,
-    bg: "#EAD8FF",
-    color: "#6B21A8",
-  },
-  {
-    title: "Star Reader",
-    icon: Star,
-    bg: "#FFF3B0",
-    color: "#D97706",
-  },
-  {
-    title: "Helping Hand",
-    icon: Heart,
-    bg: "#FFD6D6",
-    color: "#DC2626",
-  },
-  {
-    title: "Champion",
-    icon: Trophy,
-    bg: "#CFFFE2",
-    color: "#15803D",
-  },
-  {
-    title: "Story Wizard",
-    icon: Sparkles,
-    bg: "#FFE8C8",
-    color: "#EA580C",
-  },
-];
-
-export default function RecentBadges() {
-  const [expanded, setExpanded] = useState(false);
+export default function RecentBadges({
+  badges = [],
+}: Props) {
+   const [expanded, setExpanded] = useState(false);
 
   const visibleBadges = expanded ? badges : badges.slice(0, 3);
 
@@ -104,7 +63,8 @@ export default function RecentBadges() {
         } justify-items-center`}
       >
         {visibleBadges.map((badge, index) => {
-          const Icon = badge.icon;
+          const Icon =
+  iconMap[badge.icon as keyof typeof iconMap] || Star;
 
           return (
             <div

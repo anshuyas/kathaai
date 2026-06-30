@@ -15,7 +15,7 @@ import { useLanguage } from "@/app/context/LanguageContext";
 import AuthGuard from "@/app/components/AuthGuard";
 import { useRouter } from "next/navigation";
 import { getCurrentUser } from "@/app/utils/auth";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 
 export default function ParentDashboard() {
@@ -24,6 +24,8 @@ export default function ParentDashboard() {
   const router = useRouter();
   
   const user = getCurrentUser();
+
+  const [dashboard, setDashboard] = useState<any>(null);
   
   const logout = () => {
     localStorage.removeItem("token");
@@ -31,6 +33,32 @@ export default function ParentDashboard() {
   };
     const { language } = useLanguage();
     const t = translations[language];
+
+    useEffect(() => {
+  const fetchDashboard = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) return;
+
+      const payload = JSON.parse(atob(token.split(".")[1]));
+
+      const res = await fetch(
+        `http://localhost:5000/api/parent/dashboard/${payload.id}`
+      );
+
+      const data = await res.json();
+
+      if (data.success) {
+        setDashboard(data.data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  fetchDashboard();
+}, []);
 
   return (
     <AuthGuard roles={["parent", "student"]}>
@@ -120,7 +148,7 @@ export default function ParentDashboard() {
 
               Here's how{" "}
               <span className="text-[#A65200]">
-                Username
+                {user?.fullName}
               </span>{" "}
               is doing.
 
@@ -132,51 +160,32 @@ export default function ParentDashboard() {
 
           </div>
 
-          {/* Username Card */}
-
-          <div className="flex h-20 w-56 items-center justify-center rounded-3xl bg-[#A7F2B7]">
-
-            <div className="flex items-center gap-4">
-
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#19753B] text-white">
-
-                😊
-
-              </div>
-
-              <div>
-
-                <p className="font-bold tracking-wide">
-                  USERNAME
-                </p>
-
-              </div>
-
-            </div>
-
-          </div>
-
         </div>
 
         {/* Stats */}
 
-        <StatsCards />
+        {dashboard && (
+  <StatsCards stats={dashboard.stats} />
+)}
 
         {/* Middle */}
 
         <div className="mt-10 grid grid-cols-2 gap-8">
 
-          <WeeklyProgress />
+<WeeklyProgress progress={dashboard?.progress ?? []} />
 
-          <WeekComparison />
-
+{dashboard && (
+  <WeekComparison comparison={dashboard.comparison} />
+)}
         </div>
 
         {/* Bottom */}
 
         <div className="mt-8 grid grid-cols-2 gap-8">
 
-          <RecentBadges />
+         {dashboard && (
+  <RecentBadges badges={dashboard.badges} />
+)}
 
           <DailyChallenge />
 

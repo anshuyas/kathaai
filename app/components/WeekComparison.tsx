@@ -5,41 +5,28 @@ import {
   Coins,
 } from "lucide-react";
 
-export default function WeekComparison() {
-  const comparison = [
-    {
-      icon: <BookOpen size={22} />,
-      title: "Stories Read",
-      thisWeek: "8",
-      lastWeek: "6",
-      currentWidth: "92%",
-      previousWidth: "70%",
-    },
-    {
-      icon: <Clock3 size={22} />,
-      title: "Time Spent",
-      thisWeek: "1h 25m",
-      lastWeek: "1h 10m",
-      currentWidth: "84%",
-      previousWidth: "73%",
-    },
-    {
-      icon: <Star size={22} />,
-      title: "Quiz Score",
-      thisWeek: "85%",
-      lastWeek: "77%",
-      currentWidth: "96%",
-      previousWidth: "84%",
-    },
-    {
-      icon: <Coins size={22} />,
-      title: "Points",
-      thisWeek: "250",
-      lastWeek: "200",
-      currentWidth: "80%",
-      previousWidth: "63%",
-    },
-  ];
+interface ComparisonItem {
+  title: string;
+  thisWeek: string;
+  lastWeek: string;
+  currentWidth: number;
+  previousWidth: number;
+}
+
+interface Props {
+  comparison: ComparisonItem[];
+}
+
+const iconMap = {
+  "Stories Read": <BookOpen size={22} />,
+  "Time Spent": <Clock3 size={22} />,
+  "Quiz Score": <Star size={22} />,
+  Points: <Coins size={22} />,
+};
+
+export default function WeekComparison({
+  comparison,
+}: Props) {
 
   return (
     <div className="rounded-[34px] bg-[#F9F3E8] p-8 shadow-sm">
@@ -76,7 +63,7 @@ export default function WeekComparison() {
 
             <div className="mb-4 flex items-center gap-3">
 
-              {item.icon}
+             {iconMap[item.title as keyof typeof iconMap]}
 
               <span className="font-semibold text-[18px]">
                 {item.title}
@@ -92,9 +79,9 @@ export default function WeekComparison() {
 
                 <div
                   className="h-3 rounded-full bg-[#C41452]"
-                  style={{
-                    width: item.currentWidth,
-                  }}
+                 style={{
+  width: `${item.currentWidth}%`,
+}}
                 />
 
               </div>
@@ -114,8 +101,8 @@ export default function WeekComparison() {
                 <div
                   className="h-3 rounded-full bg-[#97D99C]"
                   style={{
-                    width: item.previousWidth,
-                  }}
+  width: `${item.previousWidth}%`,
+}}
                 />
 
               </div>

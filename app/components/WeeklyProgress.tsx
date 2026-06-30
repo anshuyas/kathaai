@@ -6,38 +6,32 @@ import {
   TrendingUp,
 } from "lucide-react";
 
-export default function WeeklyProgress() {
-  const progress = [
-    {
-      icon: <BookOpen size={22} />,
-      title: "Stories Read",
-      value: "+2",
-      width: "72%",
-      color: "bg-[#A65200]",
-    },
-    {
-      icon: <Clock3 size={22} />,
-      title: "Time Spent",
-      value: "+15 min",
-      width: "86%",
-      color: "bg-[#FF7E97]",
-    },
-    {
-      icon: <Star size={22} />,
-      title: "Quiz Score",
-      value: "+8% boost",
-      width: "62%",
-      color: "bg-[#1E7B44]",
-    },
-    {
-      icon: <Coins size={22} />,
-      title: "Points",
-      value: "+50 pts",
-      width: "48%",
-      color: "bg-[#FF8A3C]",
-    },
-  ];
+interface ProgressItem {
+  title: string;
+  value: string;
+  width: number;
+}
 
+interface Props {
+  progress: ProgressItem[];
+}
+
+const iconMap = {
+  "Stories Read": <BookOpen size={22} />,
+  "Time Spent": <Clock3 size={22} />,
+  "Quiz Score": <Star size={22} />,
+  Points: <Coins size={22} />,
+};
+
+const colorMap = {
+  "Stories Read": "bg-[#A65200]",
+  "Time Spent": "bg-[#FF7E97]",
+  "Quiz Score": "bg-[#1E7B44]",
+  Points: "bg-[#FF8A3C]",
+};
+
+export default function WeeklyProgress({ progress }: Props) { 
+  
   return (
     <div className="rounded-[34px] bg-[#F9F3E8] p-8 shadow-sm">
 
@@ -69,7 +63,7 @@ export default function WeeklyProgress() {
               <div className="flex items-center gap-3">
 
                 <div className="text-[#4A4035]">
-                  {item.icon}
+                  {iconMap[item.title as keyof typeof iconMap]}
                 </div>
 
                 <span className="font-semibold text-[18px]">
@@ -89,10 +83,12 @@ export default function WeeklyProgress() {
             <div className="h-4 overflow-hidden rounded-full bg-[#F0E8DA]">
 
               <div
-                className={`h-full rounded-full ${item.color}`}
-                style={{
-                  width: item.width,
-                }}
+className={`h-full rounded-full ${
+  colorMap[item.title as keyof typeof colorMap]
+}`}
+               style={{
+  width: `${item.width}%`,
+}}
               />
 
             </div>
