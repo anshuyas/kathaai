@@ -139,12 +139,12 @@ export default function TeacherDashboard() {
         <div className="grid grid-cols-12 gap-8">
 
           <div className="col-span-8">
-    <ProgressChart />
-  </div>
+  <ProgressChart progress={dashboard.progress} />
+</div>
 
-  <div className="col-span-4">
-    <TopStudents />
-  </div>
+<div className="col-span-4">
+  <TopStudents students={dashboard.leaderboard} />
+</div>
 
 </div>
 

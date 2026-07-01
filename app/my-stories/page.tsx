@@ -28,14 +28,18 @@ export default function MyStoriesPage() {
   };
   const [activeTab, setActiveTab] = useState<"all" | "downloads" | "published">("all");
   const [stories, setStories] = useState<any[]>([]);
+  const [downloads, setDownloads] = useState<any[]>([]); 
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null); // stores _id of story to delete
   const [deleting, setDeleting] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
-  const filteredStories = stories.filter((story) => {
-    if (activeTab === "downloads") return story.downloaded === true;
-    if (activeTab === "published") return story.published === true;
-    return true;
-  });
+useEffect(() => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    setCurrentUserId(payload.id);
+  }
+}, []);
 
   useEffect(() => {
     const fetchStories = async () => {
@@ -46,18 +50,30 @@ if (!token) return;
 
 const payload = JSON.parse(atob(token.split(".")[1]));
 
-const res = await fetch(
-  `http://localhost:5000/api/story/my/${payload.id}`
-);
-        const data = await res.json();
-        setStories(data.data || []);
-      } catch (error) {
-        console.error(error);
-      }
-    };
+const [myRes, downloadsRes] = await Promise.all([
+        fetch(`http://localhost:5000/api/story/my/${payload.id}`),
+        fetch(`http://localhost:5000/api/story/downloads/${payload.id}`),
+      ]);
+
+      const myData = await myRes.json();
+      const downloadsData = await downloadsRes.json();
+
+      setStories(myData.data || []);
+      setDownloads(downloadsData.data || []);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
     fetchStories();
   }, []);
+
+  const filteredStories =
+  activeTab === "downloads"
+    ? downloads
+    : activeTab === "published"
+    ? stories.filter((s) => s.published === true)
+    : stories;
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -76,6 +92,7 @@ const res = await fetch(
       setDeleteTarget(null);
     }
   };
+  
 
   return (
     <AuthGuard roles={["student", "parent"]}>
@@ -238,9 +255,12 @@ const res = await fetch(
 
         {/*  STORIES LIST  */}
         <div className="mt-8 space-y-6">
-          {filteredStories.map((story) => (
-            <div
-              key={story._id}
+          {filteredStories.map((story) => {
+  const isDownloaded = !!currentUserId && story.downloadedBy?.includes(currentUserId);
+
+  return (
+  <div
+    key={story._id}
               className="flex items-center justify-between rounded-[28px] border border-[#E4D6C7] bg-[#F8F3EB] p-6"
             >
               <div className="flex gap-6">
@@ -262,8 +282,13 @@ const res = await fetch(
 
                   <div className="mt-16 flex items-center gap-2 font-medium">
                     <span className="h-3 w-3 rounded-full bg-green-600" />
-                    {story.published ? "Published" : "Draft"}
-                  </div>
+  {story.published ? "Published" : "Draft"}
+  {isDownloaded && (
+    <span className="ml-2 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700">
+      Downloaded
+    </span>
+  )}
+  </div>
                 </div>
               </div>
 
@@ -288,7 +313,8 @@ const res = await fetch(
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </section>
     </main>

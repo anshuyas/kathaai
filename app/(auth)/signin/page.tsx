@@ -35,7 +35,7 @@ export default function SignInPage() {
 localStorage.setItem("role", res.user.role);
 
 if (res.user.role === "teacher") {
-  router.push("/teacher");
+  router.push("/teacher/dashboard");
 } else if (res.user.role === "parent") {
   router.push("/parent");
 } else {

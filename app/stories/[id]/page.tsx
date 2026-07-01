@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import AuthGuard from "@/app/components/AuthGuard";
+import { useSearchParams } from "next/navigation";
 
 interface Scene {
   sceneNo: number;
@@ -33,8 +34,14 @@ interface Story {
   scenes: Scene[];
   quiz: Quiz[];
   published: boolean;
-  downloaded: boolean;
+  downloadedBy: string[];
   videoUrl?: string;
+  readReward: number;
+quizReward: number;
+completionReward: number;
+totalReward: number;
+isDailyChallenge: boolean;
+challengeDate: string;
 }
 
 export default function StoryPage({
@@ -57,6 +64,7 @@ const [storyCompleted, setStoryCompleted] = useState(false);
 const [showQuiz, setShowQuiz] = useState(false);
 const [currentQuestion, setCurrentQuestion] = useState(0);
 const [quizFinished, setQuizFinished] = useState(false);
+const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
 const [selectedAnswers, setSelectedAnswers] =
   useState<Record<number, string>>({});
@@ -65,7 +73,18 @@ const [quizSubmitted, setQuizSubmitted] =
   useState(false);
 
 const [score, setScore] = useState(0);
+const searchParams = useSearchParams();
 
+const isDailyChallenge =
+  searchParams.get("challenge") === "true";
+
+  useEffect(() => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    setCurrentUserId(payload.id);
+  }
+}, []);
 
   useEffect(() => {
     const fetchStory = async () => {
@@ -124,6 +143,8 @@ setSessionId(readingData.data._id);
 
     const scene = story.scenes[currentScene];
     console.log(scene.imageUrl);
+
+    const isDownloaded = !!currentUserId && story.downloadedBy?.includes(currentUserId);
     
 const submitQuiz = async () => {
   console.log("QUIZ DATA:");
@@ -139,6 +160,12 @@ story.quiz.forEach((q, index) => {
 console.log("FINAL TOTAL:", total);
 
   setScore(total);
+
+  if (isDailyChallenge) {
+  console.log("✅ Daily Challenge completed");
+} else {
+  console.log("📖 Story completed");
+}
 
   if (!sessionId) {
     console.error("No reading session found");
@@ -177,7 +204,9 @@ console.log({
       body: JSON.stringify({
         sessionId,
         score: total,
-        pointsEarned: total * 10,
+        pointsEarned: isDailyChallenge
+  ? story.totalReward
+  : 0,
       }),
     });
 
@@ -190,10 +219,17 @@ console.log({
 const q = story.quiz[currentQuestion];
 const downloadStory = async () => {
   try {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    const payload = JSON.parse(atob(token.split(".")[1]));
+
     const res = await fetch(
       `http://localhost:5000/api/story/${story._id}/download`,
       {
         method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: payload.id }),
       }
     );
 
@@ -201,17 +237,18 @@ const downloadStory = async () => {
 
     if (data.success) {
       alert("Story downloaded for offline reading!");
-
-      // Update UI immediately
       setStory(data.data);
+    } else {
+      console.error("Download failed:", data.message);
     }
   } catch (err) {
     console.error(err);
   }
 };
+console.log("isDailyChallenge:", isDailyChallenge);
 
   return (
-    <AuthGuard roles={["student", "parent"]}>
+    <AuthGuard roles={["student", "parent", "teacher"]}>
   <main className="min-h-screen bg-[#F7F1E7]">
   <div className="mx-auto max-w-6xl px-6 py-8">
 
@@ -232,10 +269,7 @@ const downloadStory = async () => {
   className="flex items-center gap-2 rounded-xl bg-[#EF7F8F] px-6 py-3 font-medium text-white shadow hover:bg-[#E46D7D]"
 >
   <Download size={18} />
-
-  {story.downloaded
-    ? "Downloaded"
-    : "Download for Offline"}
+  {isDownloaded ? "Downloaded" : "Download for Offline"}
 </button>
 </div>
 
@@ -618,8 +652,10 @@ setStoryCompleted(true);
         </div>
 
         <h2 className="mt-5 text-4xl font-black">
-          Great Job!
-        </h2>
+  {isDailyChallenge
+    ? "🏆 Daily Challenge Complete!"
+    : "Great Job!"}
+</h2>
 
         <p className="mt-4 text-xl text-[#666]">
           You scored
@@ -632,8 +668,10 @@ setStoryCompleted(true);
         </div>
 
         <p className="mt-5 text-lg text-[#666]">
-          Keep reading stories to earn more points and improve your skills!
-        </p>
+  {isDailyChallenge
+    ? `You earned ${story.totalReward} bonus points for completing today's challenge!`
+    : "Keep reading stories to improve your skills!"}
+</p>
 
         <div className="mt-10 flex justify-center gap-4">
 

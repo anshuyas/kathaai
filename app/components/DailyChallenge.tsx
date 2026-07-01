@@ -1,7 +1,7 @@
 "use client";
 
 import { Clock3, Trophy } from "lucide-react";
-
+import { useRouter } from "next/navigation";
 interface Props {
   title?: string;
   countdown?: string;
@@ -11,6 +11,9 @@ export default function DailyChallenge({
   title = "Daily Challenge",
   countdown = "10 : 23 : 33",
 }: Props) {
+
+  const router = useRouter();
+  
   return (
     <div className="flex h-[270px] items-center justify-between rounded-[34px] bg-[#A9F0B7] px-8 shadow-sm">
 
@@ -37,6 +40,7 @@ export default function DailyChallenge({
         </div>
 
         <button
+        onClick={() => router.push("/daily-challenge")}
           className="
             mt-8
             flex

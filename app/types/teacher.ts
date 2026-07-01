@@ -1,7 +1,6 @@
 export interface Progress {
-  labels: string[];
-  storiesRead: number[];
-  quizzesTaken: number[];
+  totalStoriesRead: number;
+  totalQuizzesCompleted: number;
 }
 
 export interface Student {
