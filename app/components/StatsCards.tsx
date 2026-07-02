@@ -1,3 +1,5 @@
+"use client";
+
 import {
   BookOpen,
   Clock3,
@@ -6,6 +8,7 @@ import {
   FileText,
   Download,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface StatsProps {
   stats: {
@@ -17,6 +20,7 @@ interface StatsProps {
 }
 
 export default function StatsCards({ stats }: StatsProps) {
+  const router = useRouter();
   const cards = [
     {
       icon: <BookOpen size={30} />,
@@ -71,24 +75,27 @@ export default function StatsCards({ stats }: StatsProps) {
         ))}
       </div>
 
-      <div className="col-span-2">
-        <div className="flex h-full flex-col items-center justify-center rounded-[28px] bg-[#FFE382] px-5 py-7 shadow-sm">
-          <FileText
-            size={34}
-            className="text-[#A65200]"
-          />
+     <div className="col-span-2">
+  <button
+    onClick={() => router.push("/parent/weekly-report")}
+    className="flex h-full w-full cursor-pointer flex-col items-center justify-center rounded-[28px] bg-[#FFE382] px-5 py-7 shadow-sm transition hover:scale-[1.02] hover:bg-[#FFD65E]"
+  >
+    <FileText
+      size={34}
+      className="text-[#A65200]"
+    />
 
-          <h3 className="mt-5 text-center text-lg font-bold leading-6">
-            Weekly
-            <br />
-            Report
-          </h3>
+    <h3 className="mt-5 text-center text-lg font-bold leading-6">
+      Weekly
+      <br />
+      Report
+    </h3>
 
-          <button className="mt-6 flex h-12 w-12 items-center justify-center rounded-full bg-white transition hover:scale-105">
-            <Download size={20} />
-          </button>
-        </div>
-      </div>
+    <div className="mt-6 flex h-12 w-12 items-center justify-center rounded-full bg-white">
+      <Download size={20} />
     </div>
+  </button>
+</div>
+      </div>
   );
 }
