@@ -22,25 +22,35 @@ interface Challenge {
 export default function DailyChallengePage() {
   const router = useRouter();
 
-  const [challenge, setChallenge] =
-    useState<Challenge | null>(null);
-
+  const [challenge, setChallenge] = useState<Challenge | null>(null);
+  const [completedToday, setCompletedToday] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [noChallenge, setNoChallenge] = useState(false);
 
   useEffect(() => {
     const fetchChallenge = async () => {
       try {
+        const token = localStorage.getItem("token");
+
+        if (!token) return;
+
+        const payload = JSON.parse(atob(token.split(".")[1]));
+
         const res = await fetch(
-          "http://localhost:5000/api/daily-challenge/today"
+          `http://localhost:5000/api/daily-challenge/today/${payload.id}`
         );
 
         const data = await res.json();
 
         if (data.success) {
           setChallenge(data.data);
+          setCompletedToday(data.completedToday);
+        } else {
+          setNoChallenge(true);
         }
       } catch (err) {
         console.error(err);
+        setNoChallenge(true);
       } finally {
         setLoading(false);
       }
@@ -59,12 +69,34 @@ export default function DailyChallengePage() {
     );
   }
 
-  if (!challenge) {
+  if (noChallenge || !challenge) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#FFF9EB]">
         <h2 className="text-2xl font-bold">
           No Challenge Available Today
         </h2>
+      </main>
+    );
+  }
+
+  if (completedToday) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#FFF9EB]">
+        <div className="rounded-[36px] bg-white p-10 text-center shadow">
+          <Trophy size={70} className="mx-auto text-[#156C39]" />
+          <h2 className="mt-6 text-3xl font-black">
+            You've Already Completed Today's Challenge!
+          </h2>
+          <p className="mt-4 text-lg text-[#6B6258]">
+            Come back after the timer resets for a new challenge.
+          </p>
+          <button
+            onClick={() => router.push("/dashboard")}
+            className="mt-8 rounded-2xl bg-[#156C39] px-8 py-4 text-lg font-bold text-white transition hover:bg-[#12582F]"
+          >
+            Back to Dashboard
+          </button>
+        </div>
       </main>
     );
   }

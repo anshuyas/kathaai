@@ -1,19 +1,43 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Clock3, Trophy } from "lucide-react";
 import { useRouter } from "next/navigation";
+
 interface Props {
   title?: string;
-  countdown?: string;
+}
+
+function getTimeUntilMidnight(): string {
+  const now = new Date();
+  const midnight = new Date(now);
+  midnight.setHours(24, 0, 0, 0); // next midnight
+
+  const diff = midnight.getTime() - now.getTime();
+
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+  const pad = (n: number) => String(n).padStart(2, "0");
+
+  return `${pad(hours)} : ${pad(minutes)} : ${pad(seconds)}`;
 }
 
 export default function DailyChallenge({
   title = "Daily Challenge",
-  countdown = "10 : 23 : 33",
 }: Props) {
-
   const router = useRouter();
-  
+  const [countdown, setCountdown] = useState(getTimeUntilMidnight());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCountdown(getTimeUntilMidnight());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="flex h-[270px] items-center justify-between rounded-[34px] bg-[#A9F0B7] px-8 shadow-sm">
 
@@ -40,7 +64,7 @@ export default function DailyChallenge({
         </div>
 
         <button
-        onClick={() => router.push("/daily-challenge")}
+          onClick={() => router.push("/daily-challenge")}
           className="
             mt-8
             flex
