@@ -36,6 +36,7 @@ interface Story {
   published: boolean;
   downloadedBy: string[];
   videoUrl?: string;
+  videoStatus?: "pending" | "generating" | "completed" | "failed";
   readReward: number;
 quizReward: number;
 completionReward: number;
@@ -77,6 +78,8 @@ const searchParams = useSearchParams();
 
 const isDailyChallenge =
   searchParams.get("challenge") === "true";
+
+const [videoProgress, setVideoProgress] = useState(0);
 
   useEffect(() => {
   const token = localStorage.getItem("token");
@@ -301,113 +304,86 @@ console.log("isDailyChallenge:", isDailyChallenge);
 {mode === "video" ? (
 
   <>
-      {/* PLAYER */}
-<div className="mx-auto mt-8 max-w-5xl rounded-[32px] bg-white p-5 shadow-lg">
-  <div className="relative overflow-hidden rounded-[30px]">
 
-   <img
-  src={scene.imageUrl}
-  alt={`Scene ${scene.sceneNo}`}
-  className="h-[500px] w-full rounded-[24px] object-cover"
-/>
+    <div className="mx-auto mt-8 max-w-5xl rounded-[32px] bg-white p-5 shadow-lg">
+      {story.videoUrl ? (
+        <video
+          src={`http://localhost:5000${story.videoUrl}`}
+          controls
+          className="w-full rounded-[24px]"
+          onTimeUpdate={(e) => {
+            const video = e.currentTarget;
+            setVideoProgress((video.currentTime / video.duration) * 100 || 0);
+          }}
+          onEnded={async () => {
+            const duration = Math.floor(
+              (Date.now() - startTime) / 1000
+            );
 
-    <div className="absolute inset-0 flex items-center justify-center">
+            await fetch(
+              "http://localhost:5000/api/reading/finish",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  sessionId,
+                  duration,
+                }),
+              }
+            );
 
-      <button className="flex h-28 w-28 items-center justify-center rounded-full bg-white/30 backdrop-blur">
-        ▶
-      </button>
-
-<button
-  onClick={async () => {
-  if (currentScene < story.scenes.length - 1) {
-    setCurrentScene(currentScene + 1);
-    return;
-  }
-
-  const duration = Math.floor(
-    (Date.now() - startTime) / 1000
-  );
-
-  await fetch(
-    "http://localhost:5000/api/reading/finish",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        sessionId,
-        duration,
-      }),
-    }
-  );
-
-setStoryCompleted(true);
-}}
-  className="mt-6 rounded-xl bg-[#B35A00] px-6 py-3 text-white"
->
-  Next Scene
-</button>
-
+            setStoryCompleted(true);
+          }}
+        />
+      ) : (
+        <div className="flex h-[400px] flex-col items-center justify-center rounded-[24px] bg-[#F3E8D8] text-center">
+          <p className="text-xl font-semibold text-[#A65200]">
+            Video not available yet
+          </p>
+          <p className="mt-2 text-[#8B7E71]">
+            {story.videoStatus === "generating"
+              ? "Your video is being generated. Check back in a minute!"
+              : "Switch to Reading Mode to enjoy this story."}
+          </p>
+        </div>
+      )}
     </div>
 
-    <div className="absolute right-6 top-6">
-
-  <div className="rounded-xl bg-black/40 p-3 backdrop-blur">
-    <Settings size={20} color="white" />
-  </div>
-
-</div>
-
-    <div className="absolute bottom-12 left-0 w-full text-center">
-      <h2 className="text-5xl font-bold text-white">
-        {story.title}
-      </h2>
-    </div>
-
-  </div>
-</div>
-
-      {/* PROGRESS */}
+    {/* PROGRESS */}
+    {story.videoUrl && (
       <div className="mx-auto mt-8 max-w-5xl">
 
-  <div className="rounded-2xl bg-[#C8F0CD] p-6">
+        <div className="rounded-2xl bg-[#C8F0CD] p-6">
 
-    <div className="mb-3 flex items-center justify-between">
+          <div className="mb-3 flex items-center justify-between">
 
-      <h3 className="text-lg font-bold">
-        Story Progress
-      </h3>
+            <h3 className="text-lg font-bold">
+              Story Progress
+            </h3>
 
-      <span className="font-semibold">
-        {Math.round(
-          ((currentScene + 1) /
-            story.scenes.length) *
-            100
-        )}
-        %
-      </span>
+            <span className="font-semibold">
+              {Math.round(videoProgress)}%
+            </span>
 
-    </div>
+          </div>
 
-    <div className="h-4 rounded-full bg-[#DFF5E2]">
+          <div className="h-4 rounded-full bg-[#DFF5E2]">
 
-      <div
-        className="h-4 rounded-full bg-[#2E8B57]"
-        style={{
-          width: `${
-            ((currentScene + 1) /
-              story.scenes.length) *
-            100
-          }%`,
-        }}
-      />
+            <div
+              className="h-4 rounded-full bg-[#2E8B57] transition-all"
+              style={{ width: `${videoProgress}%` }}
+            />
 
-    </div>
+          </div>
 
-  </div>
-</div>
-</>
+        </div>
+      </div>
+    )}
+
+  </>
+
 ) : (
 
    /* READING MODE */
