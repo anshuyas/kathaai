@@ -17,35 +17,35 @@ import { getCurrentUser } from "@/app/utils/auth";
 
 export default function TeacherDashboard() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  
+
   const router = useRouter();
-  
+
   const user = getCurrentUser();
-  
+
   const logout = () => {
     localStorage.removeItem("token");
     router.push("/");
   };
-      const { language } = useLanguage();
+  const { language } = useLanguage();
   const t = translations[language];
   const [dashboard, setDashboard] =
     useState<DashboardData | null>(null);
 
   const [loading, setLoading] = useState(true);
 
+  const fetchDashboard = async () => {
+    const res = await fetch(
+      "http://localhost:5000/api/teacher/dashboard"
+    );
+
+    const json = await res.json();
+
+    setDashboard(json.data);
+
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchDashboard = async () => {
-      const res = await fetch(
-        "http://localhost:5000/api/teacher/dashboard"
-      );
-
-      const json = await res.json();
-
-      setDashboard(json.data);
-
-      setLoading(false);
-    };
-
     fetchDashboard();
   }, []);
 
@@ -153,6 +153,7 @@ export default function TeacherDashboard() {
 
             <StoryApprovals
               approvals={dashboard.approvals}
+              onActionComplete={fetchDashboard}
             />
 
           </div>

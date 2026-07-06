@@ -30,12 +30,14 @@ interface Props {
     approved: Story[];
     rejected: Story[];
   };
+  onActionComplete?: () => void;
 }
 
 export default function StoryApprovals({
   approvals,
+  onActionComplete,
 }: Props) {
-  const [tab, setTab] = useState<
+  const [tab, setTab] = useState <
     "pending" | "approved" | "rejected"
   >("pending");
 
@@ -67,6 +69,8 @@ useEffect(() => {
   setStories((prev) =>
     prev.filter((story) => story._id !== id)
   );
+
+  onActionComplete?.();
 };
 
 const rejectStory = async (id: string) => {
@@ -92,6 +96,8 @@ const rejectStory = async (id: string) => {
   setStories((prev) =>
     prev.filter((story) => story._id !== id)
   );
+
+  onActionComplete?.();
 };
 
   return (
@@ -193,18 +199,20 @@ const rejectStory = async (id: string) => {
   </Link>
 
   <button
-    onClick={() => approveStory(story._id)}
-    className="rounded-xl bg-[#BEE6C5] p-3"
-  >
-    <Check size={22} />
-  </button>
+  onClick={() => approveStory(story._id)}
+  aria-label="Approve"
+  className="rounded-xl bg-[#BEE6C5] p-3"
+>
+  <Check size={22} />
+</button>
 
-  <button
-    onClick={() => rejectStory(story._id)}
-    className="rounded-xl bg-[#FFD3D3] p-3"
-  >
-    <X size={22} />
-  </button>
+<button
+  onClick={() => rejectStory(story._id)}
+  aria-label="Reject"
+  className="rounded-xl bg-[#FFD3D3] p-3"
+>
+  <X size={22} />
+</button>
 
 </div>
 
