@@ -14,66 +14,71 @@ import { useState, useEffect } from "react";
 import AuthGuard from "../components/AuthGuard";
 import { useRouter } from "next/navigation";
 import { getCurrentUser } from "../utils/auth";
+import { useLanguage } from "../context/LanguageContext";
+import { translations } from "../lib/translations";
 
 export default function MyStoriesPage() {
+  const { language } = useLanguage();
+  const t = translations[language];
+
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  
+
   const router = useRouter();
-  
+
   const user = getCurrentUser();
-  
+
   const logout = () => {
     localStorage.removeItem("token");
     router.push("/");
   };
   const [activeTab, setActiveTab] = useState<"all" | "downloads" | "published">("all");
   const [stories, setStories] = useState<any[]>([]);
-  const [downloads, setDownloads] = useState<any[]>([]); 
-  const [deleteTarget, setDeleteTarget] = useState<string | null>(null); // stores _id of story to delete
+  const [downloads, setDownloads] = useState<any[]>([]);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
-useEffect(() => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    setCurrentUserId(payload.id);
-  }
-}, []);
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      setCurrentUserId(payload.id);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchStories = async () => {
       try {
-       const token = localStorage.getItem("token");
+        const token = localStorage.getItem("token");
 
-if (!token) return;
+        if (!token) return;
 
-const payload = JSON.parse(atob(token.split(".")[1]));
+        const payload = JSON.parse(atob(token.split(".")[1]));
 
-const [myRes, downloadsRes] = await Promise.all([
-        fetch(`http://localhost:5000/api/story/my/${payload.id}`),
-        fetch(`http://localhost:5000/api/story/downloads/${payload.id}`),
-      ]);
+        const [myRes, downloadsRes] = await Promise.all([
+          fetch(`http://localhost:5000/api/story/my/${payload.id}`),
+          fetch(`http://localhost:5000/api/story/downloads/${payload.id}`),
+        ]);
 
-      const myData = await myRes.json();
-      const downloadsData = await downloadsRes.json();
+        const myData = await myRes.json();
+        const downloadsData = await downloadsRes.json();
 
-      setStories(myData.data || []);
-      setDownloads(downloadsData.data || []);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+        setStories(myData.data || []);
+        setDownloads(downloadsData.data || []);
+      } catch (error) {
+        console.error(error);
+      }
+    };
 
     fetchStories();
   }, []);
 
   const filteredStories =
-  activeTab === "downloads"
-    ? downloads
-    : activeTab === "published"
-    ? stories.filter((s) => s.published === true)
-    : stories;
+    activeTab === "downloads"
+      ? downloads
+      : activeTab === "published"
+      ? stories.filter((s) => s.published === true)
+      : stories;
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -92,7 +97,6 @@ const [myRes, downloadsRes] = await Promise.all([
       setDeleteTarget(null);
     }
   };
-  
 
   return (
     <AuthGuard roles={["student", "parent"]}>
@@ -107,11 +111,11 @@ const [myRes, downloadsRes] = await Promise.all([
             </div>
 
             <h2 className="mt-5 text-2xl font-bold text-[#2D241C]">
-              Delete Story?
+              {t.deleteStoryTitle}
             </h2>
 
             <p className="mt-2 text-[#7B6E62]">
-              Do you want to delete this story? This action cannot be undone.
+              {t.deleteStoryConfirm}
             </p>
 
             <div className="mt-8 flex gap-4">
@@ -119,7 +123,7 @@ const [myRes, downloadsRes] = await Promise.all([
                 onClick={() => setDeleteTarget(null)}
                 className="flex-1 rounded-2xl bg-green-500 px-6 py-3 font-semibold text-white hover:bg-green-600 transition-colors"
               >
-                Cancel
+                {t.cancel}
               </button>
 
               <button
@@ -127,7 +131,7 @@ const [myRes, downloadsRes] = await Promise.all([
                 disabled={deleting}
                 className="flex-1 rounded-2xl bg-red-500 px-6 py-3 font-semibold text-white hover:bg-red-600 transition-colors disabled:opacity-60"
               >
-                {deleting ? "Deleting..." : "Delete"}
+                {deleting ? t.deleting : t.delete}
               </button>
             </div>
           </div>
@@ -140,11 +144,11 @@ const [myRes, downloadsRes] = await Promise.all([
           <h1 className="text-3xl font-black text-[#9A4D00]">कथाAI</h1>
 
           <div className="hidden items-center gap-10 text-sm font-medium md:flex">
-            <Link href="/">Home</Link>
-            <Link href="/library">Library</Link>
-            <Link href="/create">Create</Link>
-            <Link href="/my-stories" className="text-[#B76800]">My Stories</Link>
-            <Link href="/dashboard">Dashboard</Link>
+            <Link href="/">{t.home}</Link>
+            <Link href="/library">{t.library}</Link>
+            <Link href="/create">{t.create}</Link>
+            <Link href="/my-stories" className="text-[#B76800]">{t.myStories}</Link>
+            <Link href="/dashboard">{t.dashboard}</Link>
           </div>
           <div className="flex items-center gap-3">
  <LanguageDropdown />
@@ -177,7 +181,7 @@ const [myRes, downloadsRes] = await Promise.all([
         className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-red-600 transition hover:bg-red-50"
       >
         <LogOut size={18} />
-        Logout
+        {t.logout}
       </button>
 </div>
   )}
@@ -190,7 +194,7 @@ const [myRes, downloadsRes] = await Promise.all([
       <section className="mx-auto max-w-7xl px-8 py-10">
         <div className="flex items-start justify-between">
           <p className="text-xl font-black text-[#5F5348]">
-            Stories created by you
+            {t.storiesCreatedByYou}
           </p>
 
           <Link
@@ -198,7 +202,7 @@ const [myRes, downloadsRes] = await Promise.all([
             className="flex items-center gap-2 rounded-2xl bg-[#B35A00] px-8 py-4 text-lg font-semibold text-white shadow-md"
           >
             <Sparkles size={18} />
-            Create new
+            {t.createNew}
           </Link>
         </div>
 
@@ -214,7 +218,7 @@ const [myRes, downloadsRes] = await Promise.all([
                   : "bg-[#E6DDD0] text-[#5A4D42]"
               }`}
             >
-              {tab === "all" ? "All Stories" : tab === "downloads" ? "Downloads" : "Published Stories"}
+              {tab === "all" ? t.allStories : tab === "downloads" ? t.downloads : t.publishedStories}
             </button>
           ))}
         </div>
@@ -228,18 +232,18 @@ const [myRes, downloadsRes] = await Promise.all([
 
             <h3 className="mt-6 text-2xl font-bold text-[#2D241C]">
               {activeTab === "downloads"
-                ? "No Downloads Yet"
+                ? t.noDownloadsYet
                 : activeTab === "published"
-                ? "No Published Stories Yet"
-                : "No Stories Yet"}
+                ? t.noPublishedStoriesYet
+                : t.noStoriesYet}
             </h3>
 
             <p className="mt-2 text-[#7B6E62]">
               {activeTab === "all"
-                ? "Create your first AI-powered story."
+                ? t.createFirstStory
                 : activeTab === "downloads"
-                ? "Download a story to access it here."
-                : "Publish a story to share it with others."}
+                ? t.downloadStoryToAccess
+                : t.publishStoryToShare}
             </p>
 
             {activeTab === "all" && (
@@ -247,7 +251,7 @@ const [myRes, downloadsRes] = await Promise.all([
                 href="/create"
                 className="mt-6 rounded-xl bg-[#B35A00] px-6 py-3 text-white"
               >
-                Create Story
+                {t.createStory}
               </Link>
             )}
           </div>
@@ -276,16 +280,16 @@ const [myRes, downloadsRes] = await Promise.all([
 
                     <span className="flex items-center gap-2 text-[#5B5148]">
                       <Calendar size={16} />
-                      Created: {new Date(story.createdAt).toLocaleDateString()}
+                      {t.created}: {new Date(story.createdAt).toLocaleDateString()}
                     </span>
                   </div>
 
                   <div className="mt-16 flex items-center gap-2 font-medium">
                     <span className="h-3 w-3 rounded-full bg-green-600" />
-  {story.published ? "Published" : "Draft"}
+  {story.published ? t.published : t.draft}
   {isDownloaded && (
     <span className="ml-2 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700">
-      Downloaded
+      {t.downloaded}
     </span>
   )}
   </div>
@@ -301,7 +305,7 @@ const [myRes, downloadsRes] = await Promise.all([
                 {/* Delete button with tooltip */}
                 <div className="group relative flex flex-col items-center">
                   <span className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[#2D241C] px-3 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
-                    Delete this story
+                    {t.deleteThisStory}
                   </span>
 
                   <button

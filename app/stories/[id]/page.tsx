@@ -8,6 +8,8 @@ import {
 import Link from "next/link";
 import AuthGuard from "@/app/components/AuthGuard";
 import { useSearchParams } from "next/navigation";
+import { useLanguage } from "@/app/context/LanguageContext";
+import { translations } from "@/app/lib/translations";
 
 interface Scene {
   sceneNo: number;
@@ -80,6 +82,8 @@ const isDailyChallenge =
   searchParams.get("challenge") === "true";
 
 const [videoProgress, setVideoProgress] = useState(0);
+const { language } = useLanguage();
+const t = translations[language];
 
   useEffect(() => {
   const token = localStorage.getItem("token");
@@ -141,8 +145,8 @@ setSessionId(readingData.data._id);
     fetchStory();
   }, [id]);
 
-  if (loading) return <div>Loading story...</div>;
-  if (!story) return <div>No story found</div>;
+  if (loading) return <div>{t.loadingStory}</div>;
+  if (!story) return <div>{t.noStoryFound}</div>;
 
     const scene = story.scenes[currentScene];
     console.log(scene.imageUrl);
@@ -272,7 +276,7 @@ console.log("isDailyChallenge:", isDailyChallenge);
   className="flex items-center gap-2 rounded-xl bg-[#EF7F8F] px-6 py-3 font-medium text-white shadow hover:bg-[#E46D7D]"
 >
   <Download size={18} />
-  {isDownloaded ? "Downloaded" : "Download for Offline"}
+  {isDownloaded ? t.downloaded : t.downloadForOffline}
 </button>
 </div>
 
@@ -285,7 +289,7 @@ console.log("isDailyChallenge:", isDailyChallenge);
         : "bg-[#ECE3D6]"
     }`}
   >
-    Video Mode
+    {t.videoMode}
   </button>
 
   <button
@@ -296,7 +300,7 @@ console.log("isDailyChallenge:", isDailyChallenge);
         : "bg-[#ECE3D6]"
     }`}
   >
-    Reading Mode
+    {t.readingMode}
   </button>
 </div>
       </div>
@@ -340,12 +344,12 @@ console.log("isDailyChallenge:", isDailyChallenge);
       ) : (
         <div className="flex h-[400px] flex-col items-center justify-center rounded-[24px] bg-[#F3E8D8] text-center">
           <p className="text-xl font-semibold text-[#A65200]">
-            Video not available yet
+            {t.videoNotAvailableYet}
           </p>
           <p className="mt-2 text-[#8B7E71]">
             {story.videoStatus === "generating"
-              ? "Your video is being generated. Check back in a minute!"
-              : "Switch to Reading Mode to enjoy this story."}
+              ? t.videoGeneratingMessage
+              : t.switchToReadingMode}
           </p>
         </div>
       )}
@@ -360,7 +364,7 @@ console.log("isDailyChallenge:", isDailyChallenge);
           <div className="mb-3 flex items-center justify-between">
 
             <h3 className="text-lg font-bold">
-              Story Progress
+              {t.storyProgress}
             </h3>
 
             <span className="font-semibold">
@@ -399,7 +403,7 @@ console.log("isDailyChallenge:", isDailyChallenge);
     />
 
     <h2 className="text-2xl font-bold">
-      Scene {story.scenes[currentScene].sceneNo}
+      {t.scene} {story.scenes[currentScene].sceneNo}
     </h2>
 
     <p className="mt-6 text-xl leading-10 text-[#3D342C]">
@@ -415,7 +419,7 @@ console.log("isDailyChallenge:", isDailyChallenge);
         }
         className="rounded-xl border px-6 py-3 disabled:opacity-40"
       >
-        Previous
+                {t.previous}
       </button>
 
       <button
@@ -447,7 +451,7 @@ console.log("isDailyChallenge:", isDailyChallenge);
     <div className="mb-3 flex items-center justify-between">
 
       <h3 className="text-lg font-bold">
-        Story Progress
+        {t.storyProgress}
       </h3>
 
       <span className="font-semibold">
@@ -492,11 +496,11 @@ console.log("isDailyChallenge:", isDailyChallenge);
     <div className="mb-10 text-center">
 
       <h2 className="text-4xl font-black">
-        🧠 Story Challenge
+        {t.storyChallenge}
       </h2>
 
       <p className="mt-3 text-lg text-[#6D6258]">
-        Can you remember what happened in the story?
+        {t.rememberStoryPrompt}
       </p>
 
     </div>
@@ -520,7 +524,7 @@ console.log("isDailyChallenge:", isDailyChallenge);
 
       <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-[#A65200]">
 
-        Question {currentQuestion + 1} of {story.quiz.length}
+        {t.questionOf} {currentQuestion + 1} {t.of} {story.quiz.length}
 
       </p>
 
@@ -572,7 +576,7 @@ console.log("isDailyChallenge:", isDailyChallenge);
           }
           className="rounded-xl border border-[#D7C9B8] px-6 py-3 disabled:opacity-40"
         >
-          ← Previous
+          {t.prevArrow}
         </button>
 
         {currentQuestion < story.quiz.length - 1 ? (
@@ -591,7 +595,7 @@ console.log("isDailyChallenge:", isDailyChallenge);
   }
   `}
 >
-  Next →
+  {t.nextArrow}
 </button>
 
         ) : (
@@ -608,7 +612,7 @@ console.log("isDailyChallenge:", isDailyChallenge);
   }
   `}
 >
-  Submit Quiz
+  {t.submitQuiz}
 </button>
 
         )}
@@ -629,12 +633,12 @@ console.log("isDailyChallenge:", isDailyChallenge);
 
         <h2 className="mt-5 text-4xl font-black">
   {isDailyChallenge
-    ? "🏆 Daily Challenge Complete!"
-    : "Great Job!"}
+    ? t.dailyChallengeComplete
+    : t.greatJob}
 </h2>
 
         <p className="mt-4 text-xl text-[#666]">
-          You scored
+          {t.youScored}
         </p>
 
         <div className="mt-3 text-6xl font-black text-[#2E8B57]">
@@ -645,8 +649,8 @@ console.log("isDailyChallenge:", isDailyChallenge);
 
         <p className="mt-5 text-lg text-[#666]">
   {isDailyChallenge
-    ? `You earned ${story.totalReward} bonus points for completing today's challenge!`
-    : "Keep reading stories to improve your skills!"}
+    ? t.dailyChallengeBonusMsg.replace("{reward}", String(story.totalReward))
+    : t.keepReadingMsg}
 </p>
 
         <div className="mt-10 flex justify-center gap-4">
@@ -655,14 +659,14 @@ console.log("isDailyChallenge:", isDailyChallenge);
             onClick={() => window.location.reload()}
             className="rounded-xl border border-[#D7C9B8] px-6 py-3"
           >
-            📖 Read Again
+                        {t.readAgain}
           </button>
 
           <Link
             href="/library"
             className="rounded-xl bg-[#A65200] px-6 py-3 text-white"
           >
-            📚 Back to Library
+                        {t.backToLibrary}
           </Link>
 
         </div>

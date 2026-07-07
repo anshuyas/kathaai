@@ -201,7 +201,7 @@ const requestApproval = async () => {
         className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-red-600 transition hover:bg-red-50"
       >
         <LogOut size={18} />
-        Logout
+        {t.logout}
       </button>
 
     </div>
@@ -217,7 +217,7 @@ const requestApproval = async () => {
         {/* LEFT PANEL */}
         <div className="rounded-[32px] border border-[#E3CDBB] bg-[#F8F1E5] p-6">
           <h2 className="text-[20px] font-medium">
-            1. Your Story Idea
+            {t.yourStoryIdea}
           </h2>
 
           <textarea
@@ -230,13 +230,13 @@ const requestApproval = async () => {
           />
 
           <h2 className="mt-8 text-[20px] font-medium">
-            2. Customize your story
+            {t.customizeYourStory}
           </h2>
 
           {/* Age */}
           <div className="mt-6">
             <label className="mb-2 block text-sm text-[#594D43]">
-              Age Group
+              {t.ageGroup}
             </label>
 
             <CustomDropdown
@@ -270,7 +270,7 @@ const requestApproval = async () => {
           {/* Heroes */}
           <div className="mt-8">
             <p className="mb-4 text-sm text-[#594D43]">
-              Choose a Hero
+              {t.chooseHero}
             </p>
 
             <div className="flex gap-4 items-start">
@@ -375,7 +375,7 @@ const requestApproval = async () => {
   {/* Language */}
   <div>
     <label className="mb-2 block text-sm font-medium text-[#594D43]">
-      Language
+      {t.language}
     </label>
 
    <CustomDropdown
@@ -388,7 +388,7 @@ const requestApproval = async () => {
   {/* Story Length */}
   <div>
     <label className="mb-2 block text-sm font-medium text-[#594D43]">
-      Story Length
+      {t.storyLength}
     </label>
 
     <CustomDropdown
@@ -401,7 +401,7 @@ const requestApproval = async () => {
   {/* Genre */}
   <div>
     <label className="mb-2 block text-sm font-medium text-[#594D43]">
-      Genre
+      {t.genre}
     </label>
 
     <CustomDropdown
@@ -423,7 +423,7 @@ const requestApproval = async () => {
   {/* Learning Goal */}
   <div>
     <label className="mb-2 block text-sm font-medium text-[#594D43]">
-      Learning Goal
+      {t.learningGoal}
     </label>
 
     <CustomDropdown
@@ -448,21 +448,21 @@ const requestApproval = async () => {
             className="mt-8 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#A65200] text-lg text-white"
           >
             <Sparkles size={18} />
-            Generate story
+            {t.generateStoryBtn}
           </button>
         </div>
 
         {/* MIDDLE PANEL */}
         <div className="rounded-[32px] border border-[#E3CDBB] bg-[#F8F1E5] p-6">
           <h2 className="text-[20px] font-medium">
-            Creating Your Story
+            {t.creatingYourStory}
           </h2>
 
           {status === "idle" && (
             <div className="flex h-[700px] flex-col items-center justify-center text-[#B1A89D]">
               <Sparkles size={48} />
               <p className="mt-6 text-2xl">
-                Awaiting your idea...
+                {t.awaitingIdea}
               </p>
             </div>
           )}
@@ -472,7 +472,7 @@ const requestApproval = async () => {
               <div className="h-14 w-14 animate-spin rounded-full border-4 border-[#A65200] border-t-transparent" />
 
               <p className="mt-6 text-xl">
-                AI is creating your story...
+                {t.aiCreatingStory}
               </p>
             </div>
           )}
@@ -491,7 +491,7 @@ const requestApproval = async () => {
             className="rounded-xl border border-[#EEE4D8] p-4"
           >
             <h3 className="mb-2 font-semibold text-[#A65200]">
-              Scene {scene.sceneNo}
+              {t.scene} {scene.sceneNo}
             </h3>
 
             <p className="leading-relaxed">
@@ -508,7 +508,7 @@ const requestApproval = async () => {
          {/* RIGHT PANEL */}
         <div className="rounded-[32px] border border-[#E3CDBB] bg-[#F8F1E5] p-6">
           <h2 className="text-[20px] font-medium">
-            Your Story
+            {t.yourStory}
           </h2>
 
           {status !== "completed" ? (
@@ -542,25 +542,25 @@ const requestApproval = async () => {
   }}
   className="mt-6 w-full rounded-2xl bg-[#A65200] py-4 text-white"
 >
-          Request Approval
+          {t.requestApprovalBtn}
         </button>
       ) : (
         <div className="rounded-3xl bg-white p-6 text-center shadow">
-          ✅ Story Submitted!
+           {t.storySubmitted}
          
       <p className="mt-2 text-[#666]">
-        Your story has been sent to your teacher for review.
+        {t.sentForReview}
       </p>
 
       <div className="mt-5 inline-block rounded-full bg-yellow-100 px-4 py-2 font-semibold text-yellow-800">
-        ⏳ Pending Approval
+        {t.pendingApprovalBadge}
       </div>
 
       <Link
         href="/my-stories"
         className="mt-6 block rounded-xl bg-[#A65200] py-3 text-center text-white hover:bg-[#8d4600]"
       >
-        View My Stories →
+        {t.viewMyStoriesArrow}
       </Link>
 
     </div>
@@ -577,7 +577,7 @@ const requestApproval = async () => {
     <div className="w-[420px] rounded-[28px] border border-[#E3CDBB] bg-[#FFF9EB] p-6 shadow-xl">
 
       <h2 className="mb-6 text-2xl font-bold text-[#A65200]">
-        Create Your Hero
+         {t.createYourHero}
       </h2>
 
       {/* HERO IMAGE */}
@@ -592,7 +592,7 @@ const requestApproval = async () => {
               />
             ) : (
               <div className="flex h-full items-center justify-center text-sm text-[#8B7E71]">
-                No Image
+                {t.noImage}
               </div>
             )}
           </div>
@@ -602,7 +602,7 @@ const requestApproval = async () => {
       {/* HERO NAME */}
       <div className="mb-4">
         <label className="mb-2 block text-sm font-medium text-[#594D43]">
-          Hero Name
+                    {t.heroNameLabel}
         </label>
 
         <input
@@ -618,7 +618,7 @@ const requestApproval = async () => {
       {/* VOICE */}
       <div className="mb-4">
         <label className="mb-2 block text-sm font-medium text-[#594D43]">
-          Voice
+          {t.voice}
         </label>
 
         <CustomDropdown
@@ -642,7 +642,7 @@ const requestApproval = async () => {
           }
           className="w-full rounded-xl bg-[#A65200] py-3 text-white"
         >
-          Upload Hero Image
+           {t.uploadHeroImage}
         </button>
 
         <button
@@ -651,7 +651,7 @@ const requestApproval = async () => {
           }
           className="w-full rounded-xl border border-[#A65200] py-3 text-[#A65200]"
         >
-          Take Photo
+          {t.takePhoto}
         </button>
       </div>
 
@@ -663,7 +663,7 @@ const requestApproval = async () => {
           }
           className="flex-1 rounded-xl border border-[#D8BDA8] py-3"
         >
-          Cancel
+          {t.cancel}
         </button>
 
         <button
@@ -683,7 +683,7 @@ const requestApproval = async () => {
 }}
           className="flex-1 rounded-xl bg-[#A65200] py-3 text-white"
         >
-          Save Hero
+          {t.saveHero}
         </button>
       </div>
     </div>

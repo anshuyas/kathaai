@@ -21,6 +21,10 @@ const GENRE_TO_LABEL_KEY: Record<string, string> = {
   festival: "festival",
   science: "science",
   adventure: "adventure",
+  fantasy: "fantasy",
+  moral: "moral",
+  historical: "historical",
+  comic: "comic",
 };
 
 function categoryLabel(cat: string, t: Record<string, string>): string {
@@ -157,7 +161,7 @@ export default function LibraryPage() {
                       className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-red-600 transition hover:bg-red-50"
                     >
                       <LogOut size={18} />
-                      Logout
+                      {t.logout}
                     </button>
                   </div>
                 )}

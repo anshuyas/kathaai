@@ -124,7 +124,7 @@ export default function ParentDashboard() {
         className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-red-600 transition hover:bg-red-50"
       >
         <LogOut size={18} />
-        Logout
+        {t.logout}
       </button>
 </div>
   )}
@@ -146,16 +146,16 @@ export default function ParentDashboard() {
 
             <h2 className="text-2xl font-semibold">
 
-              Here's how{" "}
+              {t.howIsDoing}{" "}
               <span className="text-[#A65200]">
                 {user?.fullName}
               </span>{" "}
-              is doing.
+              {t.isDoing}
 
             </h2>
 
             <p className="mt-2 text-[#6F665B]">
-              Review your child's weekly progress and creative journey.
+              {t.reviewChildProgress}
             </p>
 
           </div>

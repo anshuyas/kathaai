@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { GRADES } from "../lib/gradeToAge";
+import { useLanguage } from "../context/LanguageContext";
+import { translations } from "../lib/translations";
 
 interface GradeDropdownProps {
   value: string | null;
@@ -10,6 +12,8 @@ interface GradeDropdownProps {
 }
 
 export default function GradeDropdown({ value, onChange }: GradeDropdownProps) {
+  const { language } = useLanguage();
+  const t = translations[language];
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -29,7 +33,7 @@ export default function GradeDropdown({ value, onChange }: GradeDropdownProps) {
         onClick={() => setIsOpen(!isOpen)}
         className="flex h-12 w-full items-center justify-between rounded-2xl border border-[#D8D0C4] bg-white px-5 text-[18px] text-[#5C5147] shadow-sm"
       >
-        {value ?? "By grade"}
+        {value ?? t.byGrade}
         <ChevronDown size={20} className={`transition duration-200 ${isOpen ? "rotate-180" : ""}`} />
       </button>
 

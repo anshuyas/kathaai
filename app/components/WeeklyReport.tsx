@@ -8,7 +8,8 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { Download } from "lucide-react";
 import { toPng } from "html-to-image";
-
+import { useLanguage } from "@/app/context/LanguageContext";
+import { translations } from "@/app/lib/translations";
 
 interface SubjectPerformance {
   category: string;
@@ -40,6 +41,8 @@ interface WeeklyReportData {
 }
 
 export default function WeeklyReport() {
+  const { language } = useLanguage();
+  const t = translations[language];
   const [report, setReport] =
     useState<WeeklyReportData | null>(null);
 
@@ -80,7 +83,7 @@ export default function WeeklyReport() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#FFF8EE]">
         <h2 className="text-3xl font-bold">
-          Loading Weekly Report...
+{t.loadingWeeklyReport}
         </h2>
       </div>
     );
@@ -90,7 +93,7 @@ export default function WeeklyReport() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#FFF8EE]">
         <h2 className="text-3xl font-bold">
-          No Report Found
+          {t.noReportFound}
         </h2>
       </div>
     );
@@ -110,7 +113,7 @@ const weekAgo = new Date();
 weekAgo.setDate(today.getDate() - 6); // 7 days total, inclusive of today
 
 const formatDate = (date: Date) =>
-  date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  date.toLocaleDateString(language === "np" ? "ne-NP" : "en-US", { month: "short", day: "numeric", year: "numeric" });
 
 const dateRangeText = `${formatDate(weekAgo)} – ${formatDate(today)}`;
 
@@ -159,7 +162,7 @@ return (
           className="flex items-center gap-2 rounded-xl bg-[#B35A00] px-5 py-3 text-white shadow hover:bg-[#8C4500]"
         >
           <Download size={18} />
-          Download PDF
+          {t.downloadPdf}
         </button>
       </div>
 
@@ -167,8 +170,8 @@ return (
 
         {/* Header */}
         <div className="mb-10 text-center">
-          <h1 className="text-5xl font-black">Weekly Report</h1>
-          <p className="mt-3 text-xl text-[#666]">Student Progress Summary</p>
+          <h1 className="text-5xl font-black">{t.weeklyReportTitle}</h1>
+          <p className="mt-3 text-xl text-[#666]">{t.studentProgressSummary}</p>
           <p className="mt-2 text-lg font-semibold text-[#A65200]">{dateRangeText}</p>
         </div>
 
@@ -181,7 +184,7 @@ return (
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-white">{report.studentName}</h2>
-                <p className="text-white/80">Student</p>
+                <p className="text-white/80">{t.student}</p>
               </div>
             </div>
           </div>
@@ -193,7 +196,7 @@ return (
               </div>
               <div>
                 <p className="text-sm font-medium uppercase tracking-wide text-[#9A8A78]">
-                  Stories Read
+                  {t.storiesReadLabel}
                 </p>
                 <h2 className="text-4xl font-black text-[#A65200]">
                   {report.totalStories}
@@ -207,7 +210,7 @@ return (
       <div className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-2">
 
         <div className="rounded-3xl bg-white p-8 shadow">
-          <h2 className="mb-8 text-3xl font-black">Subject Wise Performance</h2>
+          <h2 className="mb-8 text-3xl font-black">{t.subjectWisePerformance}</h2>
 
           <div className="flex flex-col items-center gap-8 sm:flex-row">
 
@@ -255,15 +258,15 @@ return (
         </div>
 
         <div className="rounded-3xl bg-white p-8 shadow">
-          <h2 className="mb-8 text-3xl font-black">Skills Development</h2>
+          <h2 className="mb-8 text-3xl font-black"> {t.skillsDevelopment}</h2>
 
           <div className="space-y-6">
             {[
-              ["Reading", report.skills.reading],
-              ["Vocabulary", report.skills.vocabulary],
-              ["Critical Thinking", report.skills.criticalThinking],
-              ["Creativity", report.skills.creativity],
-              ["Listening", report.skills.listening],
+               [t.reading, report.skills.reading],
+              [t.vocabulary, report.skills.vocabulary],
+              [t.criticalThinking, report.skills.criticalThinking],
+              [t.creativity, report.skills.creativity],
+              [t.listening, report.skills.listening],
             ].map(([name, value]) => (
               <div key={name as string}>
                 <div className="mb-2 flex justify-between">
@@ -287,14 +290,14 @@ return (
       <div className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-2">
 
         <div className="rounded-3xl bg-white p-8 shadow">
-          <h2 className="mb-8 text-3xl font-black">Recently Read Stories</h2>
+          <h2 className="mb-8 text-3xl font-black">{t.recentlyReadStories}</h2>
 
           <table className="w-full">
             <thead>
               <tr className="border-b">
-                <th className="py-3 text-left">Story</th>
-                <th className="text-left">Genre</th>
-                <th className="text-left">Quiz Score</th>
+                <th className="py-3 text-left">{t.storyCol}</th>
+                <th className="text-left">{t.genreCol}</th>
+                <th className="text-left">{t.quizScoreCol}</th>
               </tr>
             </thead>
             <tbody>
@@ -310,7 +313,7 @@ return (
         </div>
 
         <div className="rounded-3xl bg-white p-8 shadow">
-          <h2 className="mb-6 text-3xl font-black">Personalized Recommendations</h2>
+          <h2 className="mb-6 text-3xl font-black">{t.personalizedRecommendations}</h2>
 
           <ul className="space-y-4">
             {report.recommendations.map((recommendation, index) => (
@@ -329,7 +332,7 @@ return (
 
       {/* Parent Note — full width, last */}
       <div className="mt-10 rounded-3xl bg-white p-8 shadow">
-        <h2 className="mb-6 text-3xl font-black">Parent Note</h2>
+        <h2 className="mb-6 text-3xl font-black">{t.parentNoteTitle}</h2>
 
         <div className="rounded-2xl bg-[#EAF8EA] p-6">
           <p className="text-lg leading-8 text-[#444]">{report.parentNote}</p>
