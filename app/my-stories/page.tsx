@@ -1,0 +1,327 @@
+"use client";
+
+import Link from "next/link";
+import {
+  Calendar,
+  PlayCircle,
+  Trash2,
+  Sparkles,
+  User,
+  LogOut,
+} from "lucide-react";
+import LanguageDropdown from "../components/LanguageDropdown";
+import { useState, useEffect } from "react";
+import AuthGuard from "../components/AuthGuard";
+import { useRouter } from "next/navigation";
+import { getCurrentUser } from "../utils/auth";
+import { useLanguage } from "../context/LanguageContext";
+import { translations } from "../lib/translations";
+
+export default function MyStoriesPage() {
+  const { language } = useLanguage();
+  const t = translations[language];
+
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+
+  const router = useRouter();
+
+  const user = getCurrentUser();
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    router.push("/");
+  };
+  const [activeTab, setActiveTab] = useState<"all" | "downloads" | "published">("all");
+  const [stories, setStories] = useState<any[]>([]);
+  const [downloads, setDownloads] = useState<any[]>([]);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      setCurrentUserId(payload.id);
+    }
+  }, []);
+
+  useEffect(() => {
+    const fetchStories = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        if (!token) return;
+
+        const payload = JSON.parse(atob(token.split(".")[1]));
+
+        const [myRes, downloadsRes] = await Promise.all([
+          fetch(`http://localhost:5000/api/story/my/${payload.id}`),
+          fetch(`http://localhost:5000/api/story/downloads/${payload.id}`),
+        ]);
+
+        const myData = await myRes.json();
+        const downloadsData = await downloadsRes.json();
+
+        setStories(myData.data || []);
+        setDownloads(downloadsData.data || []);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchStories();
+  }, []);
+
+  const filteredStories =
+    activeTab === "downloads"
+      ? downloads
+      : activeTab === "published"
+      ? stories.filter((s) => s.published === true)
+      : stories;
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+
+    try {
+      await fetch(`http://localhost:5000/api/story/${deleteTarget}`, {
+        method: "DELETE",
+      });
+
+      setStories((prev) => prev.filter((s) => s._id !== deleteTarget));
+    } catch (error) {
+      console.error("Failed to delete story:", error);
+    } finally {
+      setDeleting(false);
+      setDeleteTarget(null);
+    }
+  };
+
+  return (
+    <AuthGuard roles={["student", "parent"]}>
+    <main className="min-h-screen bg-[#F7F1E7]">
+
+      {/*  DELETE CONFIRMATION MODAL  */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-3xl bg-white p-8 shadow-2xl text-center">
+            <div className="flex items-center justify-center rounded-full bg-red-100 p-4 w-16 h-16 mx-auto">
+              <Trash2 size={28} className="text-red-500" />
+            </div>
+
+            <h2 className="mt-5 text-2xl font-bold text-[#2D241C]">
+              {t.deleteStoryTitle}
+            </h2>
+
+            <p className="mt-2 text-[#7B6E62]">
+              {t.deleteStoryConfirm}
+            </p>
+
+            <div className="mt-8 flex gap-4">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                className="flex-1 rounded-2xl bg-green-500 px-6 py-3 font-semibold text-white hover:bg-green-600 transition-colors"
+              >
+                {t.cancel}
+              </button>
+
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex-1 rounded-2xl bg-red-500 px-6 py-3 font-semibold text-white hover:bg-red-600 transition-colors disabled:opacity-60"
+              >
+                {deleting ? t.deleting : t.delete}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/*  HEADER  */}
+      <header className="border-b border-[#E7DDCF]">
+        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-8">
+          <h1 className="text-3xl font-black text-[#9A4D00]">कथाAI</h1>
+
+          <div className="hidden items-center gap-10 text-sm font-medium md:flex">
+            <Link href="/">{t.home}</Link>
+            <Link href="/library">{t.library}</Link>
+            <Link href="/create">{t.create}</Link>
+            <Link href="/my-stories" className="text-[#B76800]">{t.myStories}</Link>
+            <Link href="/dashboard">{t.dashboard}</Link>
+          </div>
+          <div className="flex items-center gap-3">
+ <LanguageDropdown />
+          <div className="relative">
+
+  <button
+    onClick={() => setShowProfileMenu(!showProfileMenu)}
+    className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F28A3B] text-white transition hover:scale-105"
+  >
+    <User size={18} />
+  </button>
+
+  {showProfileMenu && (
+    <div className="absolute right-0 mt-3 w-64 rounded-2xl border border-[#E8DDCF] bg-white p-5 shadow-xl z-50">
+
+      <div>
+        <h3 className="text-lg font-bold text-[#2D241C]">
+          {user?.fullName}
+        </h3>
+
+        <p className="mt-1 text-sm capitalize text-[#7B7269]">
+          {user?.role}
+        </p>
+      </div>
+
+      <div className="my-4 h-px bg-[#ECE3D6]" />
+
+      <button
+        onClick={logout}
+        className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-red-600 transition hover:bg-red-50"
+      >
+        <LogOut size={18} />
+        {t.logout}
+      </button>
+</div>
+  )}
+    </div>
+    </div>
+        </div>
+      </header>
+
+      {/*  CONTENT  */}
+      <section className="mx-auto max-w-7xl px-8 py-10">
+        <div className="flex items-start justify-between">
+          <p className="text-xl font-black text-[#5F5348]">
+            {t.storiesCreatedByYou}
+          </p>
+
+          <Link
+            href="/create"
+            className="flex items-center gap-2 rounded-2xl bg-[#B35A00] px-8 py-4 text-lg font-semibold text-white shadow-md"
+          >
+            <Sparkles size={18} />
+            {t.createNew}
+          </Link>
+        </div>
+
+        {/* FILTERS  */}
+        <div className="mt-14 flex gap-8">
+          {(["all", "downloads", "published"] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`rounded-full px-8 py-3 text-lg font-semibold capitalize transition-colors ${
+                activeTab === tab
+                  ? "bg-[#F68B3B] text-[#2C2218]"
+                  : "bg-[#E6DDD0] text-[#5A4D42]"
+              }`}
+            >
+              {tab === "all" ? t.allStories : tab === "downloads" ? t.downloads : t.publishedStories}
+            </button>
+          ))}
+        </div>
+
+        {/*  EMPTY STATE  */}
+        {filteredStories.length === 0 && (
+          <div className="mt-14 flex min-h-[400px] flex-col items-center justify-center rounded-[30px] border border-dashed border-[#D8C8B5] bg-[#FBF7EF]">
+            <div className="rounded-full bg-[#FFF0E0] p-6">
+              <Sparkles size={36} className="text-[#B35A00]" />
+            </div>
+
+            <h3 className="mt-6 text-2xl font-bold text-[#2D241C]">
+              {activeTab === "downloads"
+                ? t.noDownloadsYet
+                : activeTab === "published"
+                ? t.noPublishedStoriesYet
+                : t.noStoriesYet}
+            </h3>
+
+            <p className="mt-2 text-[#7B6E62]">
+              {activeTab === "all"
+                ? t.createFirstStory
+                : activeTab === "downloads"
+                ? t.downloadStoryToAccess
+                : t.publishStoryToShare}
+            </p>
+
+            {activeTab === "all" && (
+              <Link
+                href="/create"
+                className="mt-6 rounded-xl bg-[#B35A00] px-6 py-3 text-white"
+              >
+                {t.createStory}
+              </Link>
+            )}
+          </div>
+        )}
+
+        {/*  STORIES LIST  */}
+        <div className="mt-8 space-y-6">
+          {filteredStories.map((story) => {
+  const isDownloaded = !!currentUserId && story.downloadedBy?.includes(currentUserId);
+
+  return (
+  <div
+    key={story._id}
+              className="flex items-center justify-between rounded-[28px] border border-[#E4D6C7] bg-[#F8F3EB] p-6"
+            >
+              <div className="flex gap-6">
+                <div className="h-44 w-44 flex-shrink-0 rounded-3xl bg-[#DDD]" />
+
+                <div>
+                  <h2 className="text-4xl font-bold">{story.title}</h2>
+
+                  <div className="mt-3 flex items-center gap-3">
+                    <span className="rounded-full bg-green-200 px-4 py-1">
+                      {story.genre}
+                    </span>
+
+                    <span className="flex items-center gap-2 text-[#5B5148]">
+                      <Calendar size={16} />
+                      {t.created}: {new Date(story.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+
+                  <div className="mt-16 flex items-center gap-2 font-medium">
+                    <span className="h-3 w-3 rounded-full bg-green-600" />
+  {story.published ? t.published : t.draft}
+  {isDownloaded && (
+    <span className="ml-2 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700">
+      {t.downloaded}
+    </span>
+  )}
+  </div>
+                </div>
+              </div>
+
+              {/*  ACTIONS  */}
+              <div className="flex items-center gap-8 text-[#5A4D42]">
+                <Link href={`/stories/${story._id}`}>
+                  <PlayCircle size={28} />
+                </Link>
+
+                {/* Delete button with tooltip */}
+                <div className="group relative flex flex-col items-center">
+                  <span className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[#2D241C] px-3 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
+                    {t.deleteThisStory}
+                  </span>
+
+                  <button
+                    onClick={() => setDeleteTarget(story._id)}
+                    className="text-[#5A4D42] transition-colors hover:text-red-500"
+                  >
+                    <Trash2 size={24} />
+                  </button>
+                </div>
+              </div>
+            </div>
+            );
+          })}
+        </div>
+      </section>
+    </main>
+    </AuthGuard>
+  );
+}
